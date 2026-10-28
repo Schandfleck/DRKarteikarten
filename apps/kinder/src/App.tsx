@@ -92,7 +92,7 @@ function Login({ onLogin }: { onLogin: (u: User) => void }) {
   return (
     <div className="screen login">
       <form className="login-box" onSubmit={submit}>
-        <img src="/icon-192.png" alt="" width={88} height={88} className="login-logo" />
+        <img src="/icon.svg" alt="" width={88} height={88} className="login-logo" />
         <h1>Karteikarten</h1>
         <p>Melde dich mit deinen Zugangsdaten an.</p>
         {error && <div className="error-box">{error}</div>}
@@ -112,6 +112,7 @@ function Login({ onLogin }: { onLogin: (u: User) => void }) {
           </span>
         </label>
         <button className="btn filled large block" disabled={busy}>{busy ? 'Einen Moment …' : "Los geht's!"}</button>
+        <a className="legal-link" href="/lizenzen.txt" target="_blank" rel="noopener">Lizenzen</a>
       </form>
     </div>
   );

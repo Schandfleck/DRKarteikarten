@@ -96,6 +96,7 @@ export function App() {
           </div>
           <NavItem to="/konto" label="Mein Konto" path={path} />
           <button className="nav-item nav-logout" onClick={logout}>Abmelden</button>
+          <a className="nav-legal" href="/betreuer/lizenzen.txt" target="_blank" rel="noopener">Lizenzen</a>
         </nav>
         {menuOpen && <div className="sidebar-backdrop" onClick={() => setMenuOpen(false)} />}
         <main className="main">

@@ -7,3 +7,9 @@ backups/
 
 # Lokale Entwickler-Notizen
 API-SCHNITTSTELLEN.md
+
+# Automatisch aus assets/logo.svg erzeugt (tools/generate-icons.ts)
+apps/kinder/public/icon.svg
+apps/kinder/public/icon-*.png
+apps/kinder/public/apple-touch-icon.png
+apps/betreuer/public/icon.svg

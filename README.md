@@ -103,6 +103,8 @@ server/            Server (API, Datenbank, Sicherheit)
   test/              automatische Tests
 apps/betreuer/     Betreuer-Website (React)
 apps/kinder/       Kinder-App (React, PWA)
+assets/logo.svg    EINZIGE Vorlage für Logo und App-Symbole (PNGs entstehen beim Bauen)
+tools/             Build-Helfer: App-Symbole erzeugen, Lizenzdatei erstellen
 data/              ALLE gespeicherten Daten (nicht im Git!)
 docs/              Erklärungen zu Daten & Sicherheit
 ```

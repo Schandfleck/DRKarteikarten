@@ -6,6 +6,8 @@ COPY server/package.json server/
 COPY apps/betreuer/package.json apps/betreuer/
 COPY apps/kinder/package.json apps/kinder/
 RUN npm ci
+COPY assets assets
+COPY tools tools
 COPY apps apps
 RUN npm run build
 

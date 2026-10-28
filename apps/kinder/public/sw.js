@@ -1,7 +1,7 @@
 // Service Worker: macht die App installierbar und lädt die Oberfläche schneller.
 // Lerndaten (/api) werden NIE zwischengespeichert – sie kommen immer frisch vom Server.
-const CACHE = 'karteikarten-v2';
-const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
+const CACHE = 'karteikarten-v3';
+const SHELL = ['/', '/manifest.webmanifest', '/icon.svg', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -35,7 +35,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Logo, Icons, Manifest: aus dem Netz, ohne Verbindung aus dem Speicher (sonst fehlt z. B. das Logo auf der Anmeldeseite)
-  if (SHELL.includes(url.pathname) || url.pathname.endsWith('.png')) {
+  if (SHELL.includes(url.pathname) || /\.(png|svg)$/.test(url.pathname)) {
     event.respondWith(
       fetch(event.request)
         .then((res) => {
