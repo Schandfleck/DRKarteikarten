@@ -46,7 +46,7 @@ async function createAdmin(usernameArg?: string): Promise<void> {
   const password = await askNewPassword();
   const user = await createUser({ role: 'admin', username, displayName, password, createdBy: null });
   audit(null, 'Admin angelegt (Kommandozeile)', user.username);
-  console.log(`Admin "${user.username}" wurde angelegt. Anmeldung unter /betreuer/`);
+  console.log(`Admin "${user.username}" wurde angelegt. Anmeldung auf der Startseite /`);
 }
 
 async function resetPassword(username?: string): Promise<void> {
@@ -91,7 +91,7 @@ async function demo(): Promise<void> {
   ));
   run('INSERT INTO deck_assignments (deck_id, child_id, assigned_at, assigned_by) VALUES (?, ?, ?, ?)', deckId, kid.id, ts, admin.id);
   const file = path.join(config.dataDir, 'DEMO-ZUGANG.txt');
-  fs.writeFileSync(file, `Betreuer-Website (/betreuer/): admin / ${adminPw}\nKinder-App (/):               max / ${kidPw}\n`, { mode: 0o600 });
+  fs.writeFileSync(file, `Anmeldung für alle unter /\nBetreuer (Admin): admin / ${adminPw}\nKind:             max / ${kidPw}\n`, { mode: 0o600 });
   console.log(`Demo-Daten angelegt. Zugangsdaten stehen in: ${file}`);
 }
 

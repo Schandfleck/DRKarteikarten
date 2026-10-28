@@ -6,6 +6,8 @@ Lernsystem mit zwei Oberflächen und einem gemeinsamen Server:
 |---|---|---|
 | **Kinder-App** (PWA, installierbar auf iOS/Android) | `https://<domain>/` | Kinder lernen ihre Karteikarten |
 | **Betreuer-Website** | `https://<domain>/betreuer/` | Betreuer verwalten Kinder, Stapel und Karten |
+
+**Ein Link für alle:** Kinder und Betreuer melden sich gemeinsam unter `https://<domain>/` an. Der Server erkennt am Konto, wer sich anmeldet; Betreuer werden automatisch zur Betreuer-Website weitergeleitet.
 | **Server + Datenbank** | `https://<domain>/api/…` | speichert alles zentral |
 
 ## Funktionen
@@ -59,7 +61,7 @@ npm start
 
 Entwicklung mit automatischem Neuladen: `npm run dev:server` plus `npm run dev:betreuer` (Port 5173) oder `npm run dev:kinder` (Port 5174).
 
-Prüfungen: `npm test` (17 automatische Tests für Sicherheit und Lernablauf) und `npm run typecheck`.
+Prüfungen: `npm test` (41 automatische Tests, davon 21 reine Sicherheitstests in `server/test/security.test.ts`) und `npm run typecheck`.
 
 ## Auf einem Server betreiben (Docker)
 
@@ -75,7 +77,7 @@ Voraussetzungen: Linux-Server mit Docker und eine Domain, die per DNS auf den Se
    ```bash
    docker compose exec app node server/src/cli.ts create-admin
    ```
-5. `https://<domain>/betreuer/` öffnen und anmelden
+5. `https://<domain>/` öffnen und anmelden (Betreuer landen automatisch auf der Betreuer-Website)
 
 **Updates:** neuen Code kopieren, dann erneut `docker compose up -d --build`. Datenbank-Änderungen laufen beim Start automatisch.
 

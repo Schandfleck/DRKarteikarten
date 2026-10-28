@@ -7,7 +7,7 @@ import { findUser, publicUser, setPassword } from '../lib/users.ts';
 import { getDummyHash, verifyPassword } from '../security/passwords.ts';
 import { RateLimiter } from '../security/rateLimit.ts';
 import {
-  clearSessionCookie, createSession, currentUser, deleteSession, requireAnyUser, requireStaff,
+  appForRole, clearSessionCookie, type SessionUser, createSession, currentUser, deleteSession, requireAnyUser, requireStaff,
   setSessionCookie, type Role,
 } from '../security/sessions.ts';
 
@@ -15,12 +15,18 @@ const MAX_FAILED = 5;
 const LOCK_MINUTES = 15;
 
 export const loginLimiter = new RateLimiter(30, 15 * 60 * 1000);
+/** Fehlversuche für nicht existierende Benutzernamen – ab dem 6. Versuch dieselbe "gesperrt"-Antwort wie bei echten Konten. */
+export const unknownUserFailures = new RateLimiter(MAX_FAILED, LOCK_MINUTES * 60 * 1000);
 
 const loginSchema = z.object({
   username: z.string().trim().toLowerCase().max(64),
   password: zPassword,
   /** "native" = spätere App aus dem App Store: bekommt das Token im Antworttext statt als Cookie. */
   client: z.enum(['web', 'native']).default('web'),
+  /** Nur für Kinder: false = nach dem Schließen der App erneut Passwort eingeben. */
+  remember: z.boolean().default(true),
+  /** Von welcher Oberfläche aus angemeldet wird – Kinder nur in der Kinder-App, Betreuer nur auf der Betreuer-Website. */
+  app: z.enum(['betreuer', 'kinder']).optional(),
 });
 
 export const authRouter = Router();
@@ -35,16 +41,18 @@ authRouter.post('/login', async (req, res) => {
     body.username,
   );
   const wrong = new HttpError(401, 'Benutzername oder Passwort ist falsch.');
+  const locked = new HttpError(429, `Zu viele Fehlversuche. Das Konto ist vorübergehend gesperrt – bitte in ${LOCK_MINUTES} Minuten erneut versuchen.`);
+
+  // Immer zuerst rechnen: gleiche Antwortzeit, egal ob Konto existiert, gesperrt ist oder nicht
+  const passwordOk = await verifyPassword(body.password, user?.password_hash ?? (await getDummyHash()));
 
   if (!user) {
-    await verifyPassword(body.password, await getDummyHash()); // gleiche Antwortzeit wie bei echtem Konto
+    // Unbekannte Namen verhalten sich wie echte Konten (inkl. "gesperrt"), damit man nicht ausprobieren kann, welche Namen es gibt
+    if (!unknownUserFailures.hit(body.username)) throw locked;
     throw wrong;
   }
-  if (user.locked_until && user.locked_until > now()) {
-    const minutes = Math.ceil((Date.parse(user.locked_until) - Date.now()) / 60000);
-    throw new HttpError(429, `Zu viele Fehlversuche. Das Konto ist noch ${minutes} Minute(n) gesperrt.`);
-  }
-  if (!(await verifyPassword(body.password, user.password_hash))) {
+  if (user.locked_until && user.locked_until > now()) throw locked;
+  if (!passwordOk) {
     const failed = user.failed_logins + 1;
     if (failed >= MAX_FAILED) {
       run('UPDATE users SET failed_logins = 0, locked_until = ? WHERE id = ?',
@@ -56,22 +64,30 @@ authRouter.post('/login', async (req, res) => {
     throw wrong;
   }
   if (user.active !== 1) throw new HttpError(403, 'Dieses Konto ist deaktiviert. Bitte wende dich an einen Betreuer.');
+  const app = appForRole(user.role);
+  if (body.app && body.app !== app) {
+    throw new HttpError(403, app === 'kinder'
+      ? 'Das ist ein Kinderkonto. Kinder melden sich in der Kinder-App an.'
+      : 'Betreuer melden sich bitte auf der Betreuer-Seite an.');
+  }
 
   run('UPDATE users SET failed_logins = 0, locked_until = NULL, last_login_at = ? WHERE id = ?', now(), user.id);
-  const session = createSession(user.id, user.role, req.get('user-agent'));
+  const remember = user.role !== 'kind' || body.remember;
+  const session = createSession(user.id, user.role, req.get('user-agent'), remember);
   const profile = publicUser(findUser(user.id)!);
   if (body.client === 'native') {
     res.json({ user: profile, token: session.token, expiresAt: session.expiresAt });
   } else {
-    setSessionCookie(res, session.token, session.expiresAt);
+    setSessionCookie(res, app, session.token, session.expiresAt, remember);
     res.json({ user: profile });
   }
 });
 
 authRouter.post('/logout', (_req, res) => {
   const token = res.locals.token as string | undefined;
+  const user = res.locals.user as SessionUser | undefined;
   if (token) deleteSession(token);
-  clearSessionCookie(res);
+  if (user) clearSessionCookie(res, appForRole(user.role));
   res.json({ ok: true });
 });
 

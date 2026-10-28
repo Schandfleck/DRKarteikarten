@@ -72,6 +72,7 @@ Mindestlängen: Kinder 6 Zeichen, Betreuer/Admins 10 Zeichen. Der Knopf „Vorsc
 | **Lösungen erst nach dem Antworten** | Bei Eingabe- und Auswahlkarten schickt der Server die Lösung erst nach der Antwort |
 | **Bilder werden am Inhalt geprüft** | Nur echte PNG/JPG/WEBP/GIF-Bilder bis 5 MB. Zufällige Dateinamen. Ansehen nur für angemeldete Benutzer. |
 | **Sicherheits-Header** (CSP, HSTS, Frame-Schutz) | erschwert Angriffe über eingeschleuste Skripte oder eingebettete Seiten |
+| **„Angemeldet bleiben“ für Kinder wählbar** | Ohne Haken muss das Kind nach dem Schließen der App neu das Passwort eingeben; die Anmeldung läuft außerdem spätestens nach 2 Stunden ab. Mit Haken: 30 Tage (`SESSION_DAYS_CHILD`). |
 | **Passwort-Reset und Deaktivierung melden überall ab** | alte Geräte verlieren sofort den Zugang |
 | **Protokoll** | Nachvollziehbarkeit, wer was geändert hat (ohne Passwörter) |
 | **Container läuft nicht als root, Port nur lokal** | Von außen ist nur Caddy (HTTPS) erreichbar |

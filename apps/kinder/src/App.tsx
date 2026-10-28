@@ -1,13 +1,37 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { api, SESSION_EXPIRED, type Deck, type User } from './api.ts';
+import { api, SESSION_EXPIRED, staffTarget, type Deck, type User } from './api.ts';
 import { Study } from './Study.tsx';
+
+/*
+ * "Angemeldet bleiben" aus: Die Wahl merkt sich localStorage, sessionStorage markiert die laufende App-Sitzung.
+ * sessionStorage wird beim Schließen der App/des Tabs geleert → beim nächsten Öffnen wird abgemeldet.
+ * Zusätzlich läuft eine solche Anmeldung auf dem Server nach spätestens 2 Stunden ab.
+ */
+const REMEMBER_KEY = 'kk-remember';
+const SESSION_MARK = 'kk-session-active';
+
+function storageGet(store: Storage, key: string): string | null {
+  try { return store.getItem(key); } catch { return null; }
+}
+function storageSet(store: Storage, key: string, value: string): void {
+  try { store.setItem(key, value); } catch { /* privater Modus o. Ä. */ }
+}
 
 export function App() {
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [deck, setDeck] = useState<Deck | null>(null);
 
   useEffect(() => {
-    api.get<{ user: User }>('/auth/me').then((r) => setUser(r.user.role === 'kind' ? r.user : null), () => setUser(null));
+    const reopenedWithoutRemember = storageGet(localStorage, REMEMBER_KEY) === '0' && !storageGet(sessionStorage, SESSION_MARK);
+    if (reopenedWithoutRemember) {
+      void api.post('/auth/logout').catch(() => {}).finally(() => setUser(null));
+    } else {
+      // Kind angemeldet → App zeigen; sonst ein angemeldeter Betreuer → weiter zur Betreuer-Seite; sonst Anmeldeseite
+      api.get<{ user: User }>('/auth/me').then(
+        (r) => setUser(r.user),
+        () => api.staffMe().then(() => window.location.replace(staffTarget()), () => setUser(null)),
+      );
+    }
     const expired = () => {
       setUser(null);
       setDeck(null);
@@ -39,6 +63,7 @@ export function App() {
 function Login({ onLogin }: { onLogin: (u: User) => void }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(() => storageGet(localStorage, REMEMBER_KEY) === '1');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -47,12 +72,15 @@ function Login({ onLogin }: { onLogin: (u: User) => void }) {
     setBusy(true);
     setError(null);
     try {
-      const { user } = await api.post<{ user: User }>('/auth/login', { username, password });
+      // Gemeinsame Anmeldeseite: Der Server erkennt am Konto, ob Kind oder Betreuer
+      const { user } = await api.post<{ user: User }>('/auth/login', { username, password, remember });
       if (user.role !== 'kind') {
-        await api.post('/auth/logout');
-        setError('Betreuer melden sich bitte auf der Betreuer-Seite an.');
+        window.location.assign(staffTarget());
         return;
       }
+      if (window.location.search) history.replaceState(null, '', '/');
+      storageSet(localStorage, REMEMBER_KEY, remember ? '1' : '0');
+      storageSet(sessionStorage, SESSION_MARK, '1');
       onLogin(user);
     } catch (err) {
       setError((err as Error).message);
@@ -76,6 +104,13 @@ function Login({ onLogin }: { onLogin: (u: User) => void }) {
           <input id="password" placeholder=" " type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
           <label htmlFor="password">Passwort</label>
         </div>
+        <label className="remember">
+          <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+          <span>
+            Angemeldet bleiben
+            <small>Nur auf deinem eigenen Gerät anhaken.</small>
+          </span>
+        </label>
         <button className="btn filled large block" disabled={busy}>{busy ? 'Einen Moment …' : "Los geht's!"}</button>
       </form>
     </div>

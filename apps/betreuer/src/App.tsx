@@ -9,9 +9,8 @@ import { ChildrenPage } from './pages/Children.tsx';
 import { DashboardPage } from './pages/Dashboard.tsx';
 import { DeckDetailPage } from './pages/DeckDetail.tsx';
 import { DecksPage } from './pages/Decks.tsx';
-import { LoginPage } from './pages/Login.tsx';
 import { StaffPage } from './pages/Staff.tsx';
-import { Link, navigate, usePath } from './router.tsx';
+import { Link, usePath } from './router.tsx';
 
 function Page({ path, user }: { path: string; user: User }) {
   let m: RegExpMatchArray | null;
@@ -55,21 +54,15 @@ export function App() {
   useEffect(() => setMenuOpen(false), [path]);
 
   const logout = useCallback(() => {
-    void api.post('/auth/logout').finally(() => {
-      setUser(null);
-      navigate('/');
-    });
+    void api.post('/auth/logout').finally(() => window.location.assign('/'));
   }, []);
 
-  if (user === undefined) return <div className="loading full">Lädt …</div>;
-  if (user === null) {
-    return (
-      <>
-        <LoginPage onLogin={setUser} />
-        <Toasts />
-      </>
-    );
-  }
+  // Nicht angemeldet → gemeinsame Anmeldeseite; danach geht es zur ursprünglich aufgerufenen Seite zurück
+  useEffect(() => {
+    if (user === null) window.location.replace(`/?weiter=${encodeURIComponent(window.location.pathname)}`);
+  }, [user]);
+
+  if (!user) return <div className="loading full">Lädt …</div>;
 
   return (
     <AuthContext.Provider value={{ user, logout, refresh }}>

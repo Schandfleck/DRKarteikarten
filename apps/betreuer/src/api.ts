@@ -105,7 +105,7 @@ async function request<T>(method: string, path: string, body?: unknown, contentT
     res = await fetch(`/api${path}`, {
       method,
       credentials: 'same-origin',
-      headers: body !== undefined ? { 'content-type': contentType } : {},
+      headers: { 'x-kk-app': 'betreuer', ...(body !== undefined ? { 'content-type': contentType } : {}) },
       body: body === undefined ? undefined : body instanceof Blob ? body : JSON.stringify(body),
     });
   } catch {

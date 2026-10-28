@@ -73,10 +73,13 @@ const WORDS = [
   'Apfel', 'Biber', 'Blitz', 'Dachs', 'Delfin', 'Drache', 'Eule', 'Fuchs', 'Gans', 'Igel',
   'Kiwi', 'Koala', 'Komet', 'Krake', 'Luchs', 'Mango', 'Mond', 'Otter', 'Panda', 'Pinguin',
   'Rabe', 'Rakete', 'Robbe', 'Sonne', 'Stern', 'Tiger', 'Wal', 'Wolke', 'Zebra', 'Pirat',
+  'Adler', 'Ameise', 'Banane', 'Biene', 'Burg', 'Dino', 'Elch', 'Ente', 'Falke', 'Frosch',
+  'Hase', 'Hummel', 'Kaktus', 'Kamel', 'Katze', 'Lama', 'Maus', 'Melone', 'Nashorn', 'Papagei',
+  'Pferd', 'Pilz', 'Planet', 'Puma', 'Ritter', 'Schaf', 'Tukan', 'Vulkan', 'Wolf', 'Zitrone',
 ];
 const COLORS = ['Blau', 'Gelb', 'Gruen', 'Rot', 'Lila', 'Bunt', 'Gold', 'Silber', 'Mint', 'Orange'];
 
-/** Vorschlag für ein Kinder-Passwort, z. B. "Tiger-Blau-Mond-472" – leicht zu merken, schwer zu erraten (~8 Mio. Möglichkeiten). */
+/** Vorschlag für ein Kinder-Passwort, z. B. "Tiger-Blau-Mond-472" – leicht zu merken, schwer zu erraten (~32 Mio. Möglichkeiten). */
 export function generateChildPassword(): string {
   const pick = <T>(list: T[]) => list[randomInt(list.length)];
   return `${pick(WORDS)}-${pick(COLORS)}-${pick(WORDS)}-${randomInt(100, 1000)}`;

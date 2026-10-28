@@ -10,31 +10,12 @@ process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'kk-test-'));
 
 const { createApp } = await import('../src/app.ts');
 const { createUser } = await import('../src/lib/users.ts');
-const { one } = await import('../src/db.ts');
+const { one, all } = await import('../src/db.ts');
 const { loginLimiter } = await import('../src/routes/auth.ts');
+const { Client } = await import('./helpers.ts');
 
 let base = '';
 let server: ReturnType<ReturnType<typeof createApp>['listen']>;
-
-class Client {
-  cookie = '';
-  async req(method: string, url: string, body?: unknown, headers: Record<string, string> = {}) {
-    const res = await fetch(base + url, {
-      method,
-      headers: { ...(body !== undefined && !(body instanceof Buffer) ? { 'content-type': 'application/json' } : {}), ...(this.cookie ? { cookie: this.cookie } : {}), ...headers },
-      body: body instanceof Buffer ? body : body !== undefined ? JSON.stringify(body) : undefined,
-    });
-    const setCookie = res.headers.get('set-cookie');
-    if (setCookie) this.cookie = setCookie.split(';')[0]!;
-    const text = await res.text();
-    let json: any = null;
-    try { json = JSON.parse(text); } catch { json = text; }
-    return { status: res.status, json, headers: res.headers };
-  }
-  login(username: string, password: string) {
-    return this.req('POST', '/api/auth/login', { username, password });
-  }
-}
 
 before(async () => {
   await createUser({ role: 'admin', username: 'admin', displayName: 'Admin', password: 'Admin-Passwort-123', createdBy: null });
@@ -42,6 +23,7 @@ before(async () => {
   await new Promise((r) => server.once('listening', r));
   const addr = server.address() as { port: number };
   base = `http://127.0.0.1:${addr.port}`;
+  Client.base = base;
 });
 
 after(() => {
@@ -89,6 +71,53 @@ describe('Anmeldung', () => {
     await c.login('admin', 'Admin-Passwort-123');
     const r = await c.req('POST', '/api/decks', { title: 'x' }, { origin: 'https://boese-seite.example' });
     assert.equal(r.status, 403);
+  });
+
+  test('Kind ohne "Angemeldet bleiben" bekommt nur ein Sitzungs-Cookie mit kurzer Laufzeit', async () => {
+    await createUser({ role: 'kind', username: 'merktest', displayName: 'M', password: 'richtig123', createdBy: null });
+    const short = await new Client().req('POST', '/api/auth/login', { username: 'merktest', password: 'richtig123', remember: false });
+    assert.equal(short.status, 200);
+    assert.doesNotMatch(short.headers.get('set-cookie')!, /Expires=/i);
+    const long = await new Client().req('POST', '/api/auth/login', { username: 'merktest', password: 'richtig123', remember: true });
+    assert.match(long.headers.get('set-cookie')!, /Expires=/i);
+    const rows = all<{ hours: number }>(
+      "SELECT (julianday(s.expires_at) - julianday(s.created_at)) * 24 AS hours FROM sessions s JOIN users u ON u.id = s.user_id WHERE u.username = 'merktest' ORDER BY s.created_at",
+    );
+    assert.ok(rows.some((r) => r.hours <= 2.01), 'kurze Sitzung höchstens 2 Stunden');
+    assert.ok(rows.some((r) => r.hours > 24 * 29), 'lange Sitzung 30 Tage');
+  });
+
+  test('Betreuer- und Kinder-Anmeldung im selben Browser stören sich nicht', async () => {
+    await createUser({ role: 'kind', username: 'zweitab', displayName: 'Z', password: 'richtig123', createdBy: null });
+    const browser = new Client();
+    assert.equal((await browser.req('POST', '/api/auth/login', { username: 'admin', password: 'Admin-Passwort-123', app: 'betreuer' })).status, 200);
+    assert.equal((await browser.req('POST', '/api/auth/login', { username: 'zweitab', password: 'richtig123', app: 'kinder' })).status, 200);
+    const asStaff = await browser.req('GET', '/api/children', undefined, { 'x-kk-app': 'betreuer' });
+    assert.equal(asStaff.status, 200, 'Admin darf nach Kinder-Anmeldung weiter Kinder verwalten');
+    const asKid = await browser.req('GET', '/api/auth/me', undefined, { 'x-kk-app': 'kinder' });
+    assert.equal(asKid.json.user.username, 'zweitab');
+    // Abmelden in der Kinder-App lässt die Betreuer-Anmeldung bestehen
+    await browser.req('POST', '/api/auth/logout', {}, { 'x-kk-app': 'kinder' });
+    assert.equal((await browser.req('GET', '/api/auth/me', undefined, { 'x-kk-app': 'kinder' })).status, 401);
+    assert.equal((await browser.req('GET', '/api/children', undefined, { 'x-kk-app': 'betreuer' })).status, 200);
+  });
+
+  test('Kinderkonto kann sich nicht auf der Betreuer-Website anmelden (und umgekehrt)', async () => {
+    const kid = await new Client().req('POST', '/api/auth/login', { username: 'zweitab', password: 'richtig123', app: 'betreuer' });
+    assert.equal(kid.status, 403);
+    assert.equal(kid.headers.getSetCookie().length, 0);
+    const staff = await new Client().req('POST', '/api/auth/login', { username: 'admin', password: 'Admin-Passwort-123', app: 'kinder' });
+    assert.equal(staff.status, 403);
+  });
+
+  test('gemeinsame Anmeldeseite: ohne Angabe der Oberfläche erkennt der Server Kind oder Betreuer', async () => {
+    const staff = await new Client().req('POST', '/api/auth/login', { username: 'admin', password: 'Admin-Passwort-123' });
+    assert.equal(staff.status, 200);
+    assert.equal(staff.json.user.role, 'admin');
+    assert.match(staff.headers.getSetCookie()[0]!, /^kk_staff=/);
+    const kid = await new Client().req('POST', '/api/auth/login', { username: 'zweitab', password: 'richtig123' });
+    assert.equal(kid.json.user.role, 'kind');
+    assert.match(kid.headers.getSetCookie()[0]!, /^kk_kind=/);
   });
 
   test('native App bekommt Token statt Cookie', async () => {

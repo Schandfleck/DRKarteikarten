@@ -63,13 +63,13 @@ export class ApiError extends Error {
 
 export const SESSION_EXPIRED = 'kk:session-expired';
 
-async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
+async function request<T>(method: string, path: string, body?: unknown, app: 'kinder' | 'betreuer' = 'kinder'): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`/api${path}`, {
       method,
       credentials: 'same-origin',
-      headers: body !== undefined ? { 'content-type': 'application/json' } : {},
+      headers: { 'x-kk-app': app, ...(body !== undefined ? { 'content-type': 'application/json' } : {}) },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
@@ -77,7 +77,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    if (res.status === 401 && path !== '/auth/login') window.dispatchEvent(new Event(SESSION_EXPIRED));
+    if (res.status === 401 && path !== '/auth/login' && app === 'kinder') window.dispatchEvent(new Event(SESSION_EXPIRED));
     throw new ApiError(res.status, (data as { error?: string }).error ?? 'Etwas ist schiefgelaufen.');
   }
   return data as T;
@@ -86,7 +86,15 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 export const api = {
   get: <T>(path: string) => request<T>('GET', path),
   post: <T>(path: string, body: unknown = {}) => request<T>('POST', path, body),
+  /** Ist im Browser ein Betreuer angemeldet? (für die automatische Weiterleitung) */
+  staffMe: () => request<{ user: User }>('GET', '/auth/me', undefined, 'betreuer'),
 };
+
+/** Ziel nach Betreuer-Anmeldung: ?weiter=/betreuer/... (nur Pfade der Betreuer-Website, keine fremden Adressen) */
+export function staffTarget(): string {
+  const target = new URLSearchParams(window.location.search).get('weiter');
+  return target && /^\/betreuer(\/[\w\-/]*)?$/.test(target) ? target : '/betreuer/';
+}
 
 export const imageUrl = (id: string) => `/api/uploads/${id}`;
 
