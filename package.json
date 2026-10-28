@@ -1,0 +1,24 @@
+{
+  "name": "karteikarten",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Karteikarten-System: Betreuer-Website und Kinder-App mit gemeinsamem Server",
+  "workspaces": [
+    "server",
+    "apps/betreuer",
+    "apps/kinder"
+  ],
+  "scripts": {
+    "build": "npm run build -w apps/betreuer && npm run build -w apps/kinder",
+    "start": "npm run start -w server",
+    "dev:server": "npm run dev -w server",
+    "dev:betreuer": "npm run dev -w apps/betreuer",
+    "dev:kinder": "npm run dev -w apps/kinder",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w apps/betreuer && npm run typecheck -w apps/kinder",
+    "test": "npm test -w server",
+    "cli": "npm run cli -w server --"
+  },
+  "engines": {
+    "node": ">=26"
+  }
+}

@@ -1,0 +1,8 @@
+# Domain anpassen (muss mit PUBLIC_ORIGIN in .env übereinstimmen)
+karteikarten.example.de {
+	encode gzip
+	request_body {
+		max_size 6MB
+	}
+	reverse_proxy app:3000
+}
