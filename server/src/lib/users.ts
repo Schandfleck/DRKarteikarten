@@ -2,6 +2,7 @@ import { now, one, run } from '../db.ts';
 import { checkPasswordStrength, hashPassword } from '../security/passwords.ts';
 import { deleteUserSessions, type Role } from '../security/sessions.ts';
 import { HttpError } from './http.ts';
+import type { Language } from './i18n.ts';
 
 export interface UserRow {
   id: number;
@@ -13,9 +14,10 @@ export interface UserRow {
   locked_until: string | null;
   last_login_at: string | null;
   created_at: string;
+  language: Language | null;
 }
 
-export const USER_COLUMNS = 'id, role, username, display_name, active, failed_logins, locked_until, last_login_at, created_at';
+export const USER_COLUMNS = 'id, role, username, display_name, active, failed_logins, locked_until, last_login_at, created_at, language';
 
 export function publicUser(u: UserRow) {
   return {
@@ -27,6 +29,7 @@ export function publicUser(u: UserRow) {
     locked: !!u.locked_until && u.locked_until > now(),
     lastLoginAt: u.last_login_at,
     createdAt: u.created_at,
+    language: u.language,
   };
 }
 

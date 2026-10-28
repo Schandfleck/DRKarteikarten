@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { api, imageUrl } from '../api.ts';
+import { t } from '../i18n.ts';
 import { toast } from './ui.tsx';
 
 const MAX_SIDE = 1600;
@@ -23,7 +24,7 @@ async function shrink(file: File): Promise<Blob> {
   }
 }
 
-export function ImageUpload({ value, onChange, label = 'Bild' }: { value: string | null; onChange: (id: string | null) => void; label?: string }) {
+export function ImageUpload({ value, onChange }: { value: string | null; onChange: (id: string | null) => void }) {
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -32,7 +33,7 @@ export function ImageUpload({ value, onChange, label = 'Bild' }: { value: string
     setBusy(true);
     try {
       const blob = await shrink(file);
-      if (blob.size > 5 * 1024 * 1024) throw new Error('Das Bild ist zu groß (max. 5 MB).');
+      if (blob.size > 5 * 1024 * 1024) throw new Error(t('Das Bild ist zu groß (max. 5 MB).'));
       const { id } = await api.upload(new File([blob], file.name, { type: blob.type || file.type }));
       onChange(id);
     } catch (e) {
@@ -48,11 +49,11 @@ export function ImageUpload({ value, onChange, label = 'Bild' }: { value: string
       {value ? (
         <div className="image-preview">
           <img src={imageUrl(value)} alt="" />
-          <button type="button" className="btn btn-small" onClick={() => onChange(null)}>Bild entfernen</button>
+          <button type="button" className="btn btn-small" onClick={() => onChange(null)}>{t('Bild entfernen')}</button>
         </div>
       ) : (
         <button type="button" className="btn btn-dashed" onClick={() => input.current?.click()} disabled={busy}>
-          {busy ? 'Lädt hoch …' : `+ ${label} hinzufügen`}
+          {busy ? t('Lädt hoch …') : t('+ Bild hinzufügen')}
         </button>
       )}
       <input ref={input} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={(e) => void pick(e.target.files?.[0])} />

@@ -1,0 +1,68 @@
+/** Arabische Texte der Kinder-App und der gemeinsamen Anmeldeseite (Schlüssel = deutscher Text im Code). */
+export const ar: Record<string, string> = {
+  // Anmeldung
+  'Karteikarten': 'بطاقات التعلّم',
+  'Melde dich mit deinen Zugangsdaten an.': 'سجّل الدخول باستخدام بياناتك.',
+  'Benutzername': 'اسم المستخدم',
+  'Passwort': 'كلمة المرور',
+  'Angemeldet bleiben': 'البقاء مسجّلًا الدخول',
+  'Nur auf deinem eigenen Gerät anhaken.': 'فعّل هذا الخيار على جهازك الخاص فقط.',
+  'Einen Moment …': 'لحظة من فضلك …',
+  "Los geht's!": 'هيا نبدأ!',
+  'Lizenzen': 'التراخيص',
+
+  // Einstellungen
+  'Einstellungen': 'الإعدادات',
+  'Sprache': 'اللغة',
+  'Schließen': 'إغلاق',
+  'Die Sprache wird für dein Konto gespeichert und gilt auf allen Geräten.': 'تُحفظ اللغة في حسابك وتسري على جميع أجهزتك.',
+  'Die Sprache gilt für dieses Gerät. Nach der Anmeldung wird sie in deinem Konto gespeichert.': 'تسري اللغة على هذا الجهاز. بعد تسجيل الدخول تُحفظ في حسابك.',
+
+  // Startseite
+  'Hallo {name}!': 'مرحبًا {name}!',
+  'Was möchtest du heute lernen?': 'ماذا تريد أن تتعلّم اليوم؟',
+  'Abmelden': 'تسجيل الخروج',
+  'Nochmal versuchen': 'حاول مرة أخرى',
+  'Dir wurden noch keine Karteikarten zugeteilt.': 'لم تُخصَّص لك أي بطاقات بعد.',
+  'Frag deinen Betreuer!': 'اسأل المشرف عليك!',
+  'geschafft': 'أُنجز',
+  'Noch keine Karten': 'لا توجد بطاقات بعد',
+  '{n} Karten · Starten': 'عدد البطاقات: {n} · ابدأ',
+  'Geschafft!': 'أحسنت!',
+  'Geschafft! ({n}×)': 'أحسنت! ({n}×)',
+  'Nochmal üben': 'تدرّب مرة أخرى',
+  '{solved} von {total} richtig · Runde {round} · Weitermachen': '{solved} من {total} صحيحة · الجولة {round} · تابع',
+
+  // Lernen
+  'Lernen beenden': 'إنهاء التعلّم',
+  'Runde {round} · Karte {n} von {total}': 'الجولة {round} · البطاقة {n} من {total}',
+  'In diesem Stapel sind noch keine Karten.': 'لا توجد بطاقات في هذه المجموعة بعد.',
+  'Zurück': 'رجوع',
+  'Runde {n}': 'الجولة {n}',
+  'Super, {solved} von {total} Karten sitzen schon!': 'رائع، أتقنت {solved} من {total} بطاقات!',
+  'Jetzt üben wir die Karte, die noch nicht geklappt hat.': 'الآن نتدرّب على البطاقة التي لم تنجح بعد.',
+  'Jetzt üben wir die {n} Karten, die noch nicht geklappt haben.': 'الآن نتدرّب على البطاقات التي لم تنجح بعد (عددها {n}).',
+  'Weiter': 'التالي',
+  'Du hast alle {n} Karten richtig beantwortet.': 'أجبت عن جميع البطاقات ({n}) إجابة صحيحة.',
+  '1 Runde': 'جولة واحدة',
+  '{n} Runden': 'عدد الجولات: {n}',
+  'Alles auf Anhieb richtig!': 'كل شيء صحيح من أول مرة!',
+  '{n}× geübt': 'تدرّبت {n}×',
+  'Fertig': 'انتهيت',
+  'Nochmal von vorne': 'من البداية مرة أخرى',
+  'Tippe zum Umdrehen': 'اضغط لقلب البطاقة',
+  '✗ Wusste ich nicht': '✗ لم أكن أعرف',
+  '✓ Wusste ich': '✓ كنت أعرف',
+  'Deine Antwort': 'إجابتك',
+  'Prüfen': 'تحقّق',
+  'Mehrere Antworten können richtig sein.': 'قد تكون عدة إجابات صحيحة.',
+  '🎉 Richtig!': '🎉 صحيح!',
+  '🤔 Leider nicht richtig': '🤔 للأسف غير صحيح',
+  'Richtig wäre:': 'الإجابة الصحيحة:',
+  'Kein Problem – die Karte kommt in der nächsten Runde nochmal.': 'لا مشكلة – ستظهر البطاقة مرة أخرى في الجولة القادمة.',
+
+  // Verbindung
+  'Keine Internetverbindung. Bitte prüfe das WLAN.': 'لا يوجد اتصال بالإنترنت. يرجى التحقق من شبكة الواي فاي.',
+  'Der Server ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten noch einmal.': 'الخادم غير متاح حاليًا. يرجى المحاولة مرة أخرى بعد بضع دقائق.',
+  'Etwas ist schiefgelaufen.': 'حدث خطأ ما.',
+};

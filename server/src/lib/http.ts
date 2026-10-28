@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
+import { requestLanguage, translate } from './i18n.ts';
 
 export class HttpError extends Error {
   readonly status: number;
@@ -27,22 +28,16 @@ export function idParam(req: Request, name = 'id'): number {
   return id;
 }
 
-export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction): void {
-  if (err instanceof HttpError) {
-    res.status(err.status).json({ error: err.message });
-    return;
-  }
+export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
+  const send = (status: number, message: string) => {
+    res.status(status).json({ error: translate(message, requestLanguage(req), status) });
+  };
+  if (err instanceof HttpError) return send(err.status, err.message);
   const status = (err as { status?: number; type?: string }).status;
-  if (status === 413) {
-    res.status(413).json({ error: 'Die Datei ist zu groß.' });
-    return;
-  }
-  if (status === 400) {
-    res.status(400).json({ error: 'Ungültige Anfrage.' });
-    return;
-  }
+  if (status === 413) return send(413, 'Die Datei ist zu groß.');
+  if (status === 400) return send(400, 'Ungültige Anfrage.');
   console.error(err);
-  res.status(500).json({ error: 'Interner Fehler. Bitte später erneut versuchen.' });
+  send(500, 'Interner Fehler. Bitte später erneut versuchen.');
 }
 
 // Wiederverwendbare Bausteine für Eingaben

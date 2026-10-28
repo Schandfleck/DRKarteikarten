@@ -1,4 +1,5 @@
 import { api, formatDate, type ChildListItem, type DeckListItem } from '../api.ts';
+import { t } from '../i18n.ts';
 import { useAuth } from '../auth.tsx';
 import { EmptyState, Loading, useLoad } from '../components/ui.tsx';
 import { Link } from '../router.tsx';
@@ -21,36 +22,36 @@ export function DashboardPage() {
 
   return (
     <div className="page">
-      <h1>Hallo {user.displayName}!</h1>
+      <h1>{t('Hallo {name}!', { name: user.displayName })}</h1>
       <div className="stats">
-        <Link to="/kinder" className="stat"><span className="stat-value">{active.length}</span><span className="stat-label">aktive Kinder</span></Link>
-        <Link to="/stapel" className="stat"><span className="stat-value">{data.decks.length}</span><span className="stat-label">Kartenstapel</span></Link>
-        <Link to="/stapel" className="stat"><span className="stat-value">{cards}</span><span className="stat-label">Karten insgesamt</span></Link>
+        <Link to="/kinder" className="stat"><span className="stat-value">{active.length}</span><span className="stat-label">{t('aktive Kinder')}</span></Link>
+        <Link to="/stapel" className="stat"><span className="stat-value">{data.decks.length}</span><span className="stat-label">{t('Kartenstapel')}</span></Link>
+        <Link to="/stapel" className="stat"><span className="stat-value">{cards}</span><span className="stat-label">{t('Karten insgesamt')}</span></Link>
       </div>
 
       {data.decks.length === 0 || data.children.length === 0 ? (
         <div className="panel">
-          <h2>So geht's los</h2>
+          <h2>{t("So geht's los")}</h2>
           <ol className="steps">
-            <li className={data.decks.length ? 'done' : ''}><Link to="/stapel">Kartenstapel anlegen</Link> und Karten hinzufügen (Text, Bilder, Eingabe- oder Auswahlfragen).</li>
-            <li className={data.children.length ? 'done' : ''}><Link to="/kinder">Kinderkonten anlegen</Link> – Benutzername und Passwort werden dabei vergeben.</li>
-            <li>Jedem Kind die passenden Stapel zuteilen.</li>
-            <li>Das Kind meldet sich unter <span className="mono">{window.location.origin}/</span> an und lernt.</li>
+            <li className={data.decks.length ? 'done' : ''}><Link to="/stapel">{t('Kartenstapel anlegen')}</Link> {t('und Karten hinzufügen (Text, Bilder, Eingabe- oder Auswahlfragen).')}</li>
+            <li className={data.children.length ? 'done' : ''}><Link to="/kinder">{t('Kinderkonten anlegen')}</Link> – {t('Benutzername und Passwort werden dabei vergeben.')}</li>
+            <li>{t('Jedem Kind die passenden Stapel zuteilen.')}</li>
+            <li>{t('Das Kind meldet sich hier an und lernt:')} <span className="mono" dir="ltr">{window.location.origin}/</span></li>
           </ol>
         </div>
       ) : (
         <div className="panel">
-          <h2>Zuletzt aktiv</h2>
+          <h2>{t('Zuletzt aktiv')}</h2>
           {recent.length === 0 ? (
-            <EmptyState title="Noch keine Lernaktivität">Sobald Kinder lernen, erscheinen sie hier.</EmptyState>
+            <EmptyState title={t('Noch keine Lernaktivität')}>{t('Sobald Kinder lernen, erscheinen sie hier.')}</EmptyState>
           ) : (
             <table className="table">
-              <thead><tr><th>Kind</th><th>Stapel abgeschlossen</th><th>Zuletzt gelernt</th></tr></thead>
+              <thead><tr><th>{t('Kind')}</th><th>{t('Stapel abgeschlossen')}</th><th>{t('Zuletzt gelernt')}</th></tr></thead>
               <tbody>
                 {recent.map((c) => (
                   <tr key={c.id}>
-                    <td><Link to={`/kinder/${c.id}`}>{c.displayName}</Link></td>
-                    <td>{c.decksFinished} von {c.deckCount}</td>
+                    <td><Link to={`/kinder/${c.id}`}><bdi>{c.displayName}</bdi></Link></td>
+                    <td>{t('{n} von {total}', { n: c.decksFinished, total: c.deckCount })}</td>
                     <td>{formatDate(c.lastActivityAt)}</td>
                   </tr>
                 ))}

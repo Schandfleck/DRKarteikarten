@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { config } from '../config.ts';
 import { now, one, run } from '../db.ts';
+import { requestLanguage, translate } from '../lib/i18n.ts';
 
 export type Role = 'admin' | 'betreuer' | 'kind';
 
@@ -156,14 +157,14 @@ export function currentUser(res: Response): SessionUser {
 }
 
 export function requireRole(...roles: Role[]) {
-  return (_req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     const user = res.locals.user as SessionUser | undefined;
     if (!user) {
-      res.status(401).json({ error: 'Bitte melde dich an.' });
+      res.status(401).json({ error: translate('Bitte melde dich an.', requestLanguage(req), 401) });
       return;
     }
     if (!roles.includes(user.role)) {
-      res.status(403).json({ error: 'Dafür fehlt die Berechtigung.' });
+      res.status(403).json({ error: translate('Dafür fehlt die Berechtigung.', requestLanguage(req), 403) });
       return;
     }
     next();

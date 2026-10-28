@@ -1,4 +1,5 @@
 // Schnittstelle zum Server (siehe server/src/routes/child.ts)
+import { getLanguage, t, type Language } from './i18n.ts';
 
 export type CardType = 'flip' | 'input' | 'choice';
 
@@ -7,6 +8,7 @@ export interface User {
   role: 'admin' | 'betreuer' | 'kind';
   username: string;
   displayName: string;
+  language: Language | null;
 }
 
 export interface Progress {
@@ -63,7 +65,6 @@ export class ApiError extends Error {
 
 export const SESSION_EXPIRED = 'kk:session-expired';
 
-const OFFLINE_MESSAGE = 'Keine Internetverbindung. Bitte prüfe das WLAN.';
 
 /**
  * Unterscheidet "Gerät offline" von "Server nicht erreichbar" (z. B. Server gestoppt oder Wartung).
@@ -71,8 +72,8 @@ const OFFLINE_MESSAGE = 'Keine Internetverbindung. Bitte prüfe das WLAN.';
  */
 function connectionError(): ApiError {
   return navigator.onLine === false
-    ? new ApiError(0, OFFLINE_MESSAGE)
-    : new ApiError(0, 'Der Server ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten noch einmal.');
+    ? new ApiError(0, t('Keine Internetverbindung. Bitte prüfe das WLAN.'))
+    : new ApiError(0, t('Der Server ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten noch einmal.'));
 }
 
 async function request<T>(method: string, path: string, body?: unknown, app: 'kinder' | 'betreuer' = 'kinder'): Promise<T> {
@@ -81,7 +82,7 @@ async function request<T>(method: string, path: string, body?: unknown, app: 'ki
     res = await fetch(`/api${path}`, {
       method,
       credentials: 'same-origin',
-      headers: { 'x-kk-app': app, ...(body !== undefined ? { 'content-type': 'application/json' } : {}) },
+      headers: { 'x-kk-app': app, 'x-kk-lang': getLanguage(), ...(body !== undefined ? { 'content-type': 'application/json' } : {}) },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
@@ -91,7 +92,7 @@ async function request<T>(method: string, path: string, body?: unknown, app: 'ki
   if (!res.ok) {
     if ([502, 503, 504].includes(res.status) && !(data as { error?: string }).error) throw connectionError();
     if (res.status === 401 && path !== '/auth/login' && app === 'kinder') window.dispatchEvent(new Event(SESSION_EXPIRED));
-    throw new ApiError(res.status, (data as { error?: string }).error ?? 'Etwas ist schiefgelaufen.');
+    throw new ApiError(res.status, (data as { error?: string }).error ?? t('Etwas ist schiefgelaufen.'));
   }
   return data as T;
 }
@@ -99,6 +100,7 @@ async function request<T>(method: string, path: string, body?: unknown, app: 'ki
 export const api = {
   get: <T>(path: string) => request<T>('GET', path),
   post: <T>(path: string, body: unknown = {}) => request<T>('POST', path, body),
+  put: <T>(path: string, body: unknown) => request<T>('PUT', path, body),
   /** Ist im Browser ein Betreuer angemeldet? (für die automatische Weiterleitung) */
   staffMe: () => request<{ user: User }>('GET', '/auth/me', undefined, 'betreuer'),
 };

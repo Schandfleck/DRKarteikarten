@@ -108,6 +108,10 @@ const migrations: string[] = [
     details    TEXT NOT NULL DEFAULT ''
   );
   `,
+  `
+  -- Sprache der Oberfläche pro Konto; NULL = noch nicht gewählt (dann gilt die Auswahl des Geräts)
+  ALTER TABLE users ADD COLUMN language TEXT CHECK (language IN ('de', 'ar'));
+  `,
 ];
 
 export function openDatabase(file: string): DatabaseSync {

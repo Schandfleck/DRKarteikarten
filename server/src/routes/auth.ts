@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { now, one, run } from '../db.ts';
 import { audit } from '../lib/audit.ts';
 import { HttpError, parse, zPassword } from '../lib/http.ts';
+import { LANGUAGES } from '../lib/i18n.ts';
 import { findUser, publicUser, setPassword } from '../lib/users.ts';
 import { getDummyHash, verifyPassword } from '../security/passwords.ts';
 import { RateLimiter } from '../security/rateLimit.ts';
@@ -92,6 +93,13 @@ authRouter.post('/logout', (_req, res) => {
 });
 
 authRouter.get('/me', requireAnyUser, (_req, res) => {
+  res.json({ user: publicUser(findUser(currentUser(res).id)!) });
+});
+
+/** Sprache der Oberfläche fürs eigene Konto speichern (alle Rollen). */
+authRouter.put('/language', requireAnyUser, (req, res) => {
+  const { language } = parse(z.object({ language: z.enum(LANGUAGES, { error: 'Ungültige Sprache.' }) }), req.body);
+  run('UPDATE users SET language = ? WHERE id = ?', language, currentUser(res).id);
   res.json({ user: publicUser(findUser(currentUser(res).id)!) });
 });
 

@@ -29,6 +29,12 @@ Lernsystem mit zwei Oberflächen und einem gemeinsamen Server:
 - Der Lernstand liegt auf dem Server. Wer die App schließt, macht später genau dort weiter (auch auf einem anderen Gerät).
 - Über „Zum Startbildschirm hinzufügen“ wie eine normale App installierbar
 
+**Sprachen**
+- Deutsch und Arabisch (mit gespiegeltem Layout von rechts nach links), umschaltbar über das Zahnrad bzw. „Einstellungen“
+- Die Sprache wird im Konto gespeichert und gilt auf allen Geräten; vor der Anmeldung merkt sich das Gerät die Auswahl
+- Texte stehen in `apps/*/src/locales/ar.ts` und `server/src/lib/i18n.ts`; `npm test` meldet fehlende Übersetzungen
+- Karteninhalte (Fragen, Antworten) übersetzt die App nicht – sie erscheinen so, wie der Betreuer sie eingibt
+
 ## Technik
 
 - **Node.js 26** (TypeScript läuft direkt ohne Build-Schritt)

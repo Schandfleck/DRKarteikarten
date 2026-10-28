@@ -49,7 +49,7 @@ const endpoints = discoverEndpoints();
 /** Die einzigen Schnittstellen, die ohne Anmeldung erreichbar sein dürfen. */
 const PUBLIC = new Set(['GET /api/health', 'POST /api/auth/login', 'POST /api/auth/logout']);
 /** Was Kinder (zusätzlich zu PUBLIC) aufrufen dürfen. */
-const isChildAllowed = (e: Endpoint) => e.path.startsWith('/api/kind/') || e.path === '/api/auth/me' || (e.method === 'GET' && e.path.startsWith('/api/uploads/'));
+const isChildAllowed = (e: Endpoint) => e.path.startsWith('/api/kind/') || e.path === '/api/auth/me' || e.path === '/api/auth/language' || (e.method === 'GET' && e.path.startsWith('/api/uploads/'));
 /** Nur für Admins. */
 const isAdminOnly = (e: Endpoint) => e.path.startsWith('/api/staff') || e.path.startsWith('/api/audit');
 const label = (e: Endpoint) => `${e.method} ${e.path}`;
@@ -93,7 +93,7 @@ const callAll = (c: InstanceType<typeof Client>, list: Endpoint[], headers: Reco
 
 describe('Ohne Anmeldung', () => {
   test('Schnittstellen wurden gefunden (Plausibilität)', () => {
-    assert.ok(endpoints.length >= 39, `nur ${endpoints.length} Schnittstellen gefunden`);
+    assert.ok(endpoints.length >= 40, `nur ${endpoints.length} Schnittstellen gefunden`);
     for (const p of PUBLIC) assert.ok(endpoints.some((e) => label(e) === p), `${p} fehlt`);
   });
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../api.ts';
+import { t } from '../i18n.ts';
 import { Modal, toast } from './ui.tsx';
 
 /** Passwortfeld mit "Vorschlag erzeugen" (für Kinder gut merkbare Passwörter) und Anzeigen/Verbergen. */
@@ -27,8 +28,8 @@ export function PasswordInput({ value, onChange, forChild, minLength }: { value:
         autoComplete="new-password"
         spellCheck={false}
       />
-      <button type="button" className="btn" onClick={() => setVisible(!visible)}>{visible ? 'Verbergen' : 'Anzeigen'}</button>
-      <button type="button" className="btn" onClick={() => void suggest()}>Vorschlag</button>
+      <button type="button" className="btn" onClick={() => setVisible(!visible)}>{visible ? t('Verbergen') : t('Anzeigen')}</button>
+      <button type="button" className="btn" onClick={() => void suggest()}>{t('Vorschlag')}</button>
     </div>
   );
 }
@@ -39,30 +40,30 @@ export function PasswordInput({ value, onChange, forChild, minLength }: { value:
  */
 export function CredentialsModal({ name, username, password, onClose }: { name: string; username: string; password: string; onClose: () => void }) {
   const copy = async () => {
-    await navigator.clipboard.writeText(`Benutzername: ${username}\nPasswort: ${password}`);
-    toast.ok('Zugangsdaten kopiert');
+    await navigator.clipboard.writeText(`${t('Benutzername')}: ${username}\n${t('Passwort')}: ${password}`);
+    toast.ok(t('Zugangsdaten kopiert'));
   };
   return (
-    <Modal title="Zugangsdaten" onClose={onClose}>
+    <Modal title={t('Zugangsdaten')} onClose={onClose}>
       <div className="alert alert-info">
-        Das Passwort wird nur <strong>jetzt einmal</strong> angezeigt. Es wird verschlüsselt (als Hash) gespeichert und kann später nicht mehr angezeigt, sondern nur neu vergeben werden.
+        <strong>{t('Das Passwort wird nur jetzt einmal angezeigt.')}</strong> {t('Es wird verschlüsselt (als Hash) gespeichert und kann später nicht mehr angezeigt, sondern nur neu vergeben werden.')}
       </div>
       <div className="print-area credentials-card">
-        <div className="credentials-title">Zugang zur Karteikarten-App</div>
-        <div className="credentials-name">{name}</div>
+        <div className="credentials-title">{t('Zugang zur Karteikarten-App')}</div>
+        <div className="credentials-name" dir="auto">{name}</div>
         <dl>
-          <dt>Adresse</dt>
-          <dd>{window.location.origin}/</dd>
-          <dt>Benutzername</dt>
-          <dd className="mono">{username}</dd>
-          <dt>Passwort</dt>
-          <dd className="mono">{password}</dd>
+          <dt>{t('Adresse')}</dt>
+          <dd dir="ltr">{window.location.origin}/</dd>
+          <dt>{t('Benutzername')}</dt>
+          <dd className="mono" dir="ltr">{username}</dd>
+          <dt>{t('Passwort')}</dt>
+          <dd className="mono" dir="ltr">{password}</dd>
         </dl>
       </div>
       <div className="form-actions">
-        <button className="btn" onClick={() => void copy()}>Kopieren</button>
-        <button className="btn" onClick={() => window.print()}>Drucken</button>
-        <button className="btn btn-primary" onClick={onClose}>Fertig</button>
+        <button className="btn" onClick={() => void copy()}>{t('Kopieren')}</button>
+        <button className="btn" onClick={() => window.print()}>{t('Drucken')}</button>
+        <button className="btn btn-primary" onClick={onClose}>{t('Fertig')}</button>
       </div>
     </Modal>
   );

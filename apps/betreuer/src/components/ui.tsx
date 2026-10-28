@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { ProgressStatus } from '../api.ts';
+import { t, tKey } from '../i18n.ts';
 
 // ---------- Daten laden ----------
 
@@ -29,11 +30,11 @@ export function Loading({ error, onRetry }: { error?: string | null; onRetry?: (
   if (error) {
     return (
       <div className="alert alert-error">
-        {error} {onRetry && <button className="btn btn-small" onClick={onRetry}>Erneut versuchen</button>}
+        {error} {onRetry && <button className="btn btn-small" onClick={onRetry}>{t('Erneut versuchen')}</button>}
       </div>
     );
   }
-  return <div className="loading">Lädt …</div>;
+  return <div className="loading">{t('Lädt …')}</div>;
 }
 
 // ---------- Hinweise (Toasts) ----------
@@ -80,7 +81,7 @@ export function Modal({ title, onClose, children, wide }: { title: string; onClo
       <div className={`modal ${wide ? 'modal-wide' : ''}`} role="dialog" aria-modal="true" aria-label={title} ref={ref}>
         <div className="modal-head">
           <h2>{title}</h2>
-          <button className="icon-btn" onClick={onClose} aria-label="Schließen">✕</button>
+          <button className="icon-btn" onClick={onClose} aria-label={t('Schließen')}>✕</button>
         </div>
         <div className="modal-body">{children}</div>
       </div>
@@ -93,7 +94,7 @@ let openConfirm: (r: ConfirmRequest) => void = () => {};
 
 /** Sicherheitsabfrage, z. B. vor dem Löschen. */
 export function confirmDialog(message: string, opts: { confirmLabel?: string; danger?: boolean } = {}): Promise<boolean> {
-  return new Promise((resolve) => openConfirm({ message, confirmLabel: opts.confirmLabel ?? 'OK', danger: opts.danger ?? false, resolve }));
+  return new Promise((resolve) => openConfirm({ message, confirmLabel: opts.confirmLabel ?? t('OK'), danger: opts.danger ?? false, resolve }));
 }
 
 export function ConfirmHost() {
@@ -107,10 +108,10 @@ export function ConfirmHost() {
     setReq(null);
   };
   return (
-    <Modal title="Bitte bestätigen" onClose={() => close(false)}>
+    <Modal title={t('Bitte bestätigen')} onClose={() => close(false)}>
       <p className="confirm-text">{req.message}</p>
       <div className="form-actions">
-        <button className="btn" onClick={() => close(false)}>Abbrechen</button>
+        <button className="btn" onClick={() => close(false)}>{t('Abbrechen')}</button>
         <button className={`btn ${req.danger ? 'btn-danger' : 'btn-primary'}`} onClick={() => close(true)} autoFocus>{req.confirmLabel}</button>
       </div>
     </Modal>
@@ -132,16 +133,16 @@ export function Field({ label, hint, children }: { label: string; hint?: ReactNo
 export function ProgressBar({ value, max }: { value: number; max: number }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
   return (
-    <div className="progress" title={`${value} von ${max}`}>
+    <div className="progress" title={t('{value} von {max}', { value, max })}>
       <div className="progress-fill" style={{ width: `${pct}%` }} />
     </div>
   );
 }
 
-const STATUS_LABEL: Record<ProgressStatus, string> = { neu: 'Noch nicht begonnen', in_arbeit: 'In Arbeit', abgeschlossen: 'Abgeschlossen' };
+const STATUS_LABEL: Record<ProgressStatus, string> = { neu: tKey('Noch nicht begonnen'), in_arbeit: tKey('In Arbeit'), abgeschlossen: tKey('Abgeschlossen') };
 
 export function StatusBadge({ status }: { status: ProgressStatus }) {
-  return <span className={`badge badge-${status}`}>{STATUS_LABEL[status]}</span>;
+  return <span className={`badge badge-${status}`}>{t(STATUS_LABEL[status])}</span>;
 }
 
 export function EmptyState({ title, children }: { title: string; children?: ReactNode }) {

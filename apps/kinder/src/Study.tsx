@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { api, imageUrl, shuffle, type AnswerResult, type Deck, type Session, type StudyCard } from './api.ts';
+import { t } from './i18n.ts';
 
 type Phase =
   | { kind: 'loading' }
@@ -56,10 +57,10 @@ export function Study({ deck, onExit }: { deck: Deck; onExit: () => void }) {
   return (
     <div className="screen study">
       <header className="top-app-bar">
-        <button className="icon-button" onClick={onExit} aria-label="Lernen beenden">✕</button>
+        <button className="icon-button" onClick={onExit} aria-label={t('Lernen beenden')}>✕</button>
         <div className="top-app-bar-title">
-          <div className="title-text">{deck.title}</div>
-          {phase.kind === 'card' && <div className="subtitle">Runde {progress.round} · Karte {index + 1} von {queue.length}</div>}
+          <div className="title-text" dir="auto">{deck.title}</div>
+          {phase.kind === 'card' && <div className="subtitle">{t('Runde {round} · Karte {n} von {total}', { round: progress.round, n: index + 1, total: queue.length })}</div>}
         </div>
       </header>
       <div className="linear-progress" role="progressbar" aria-valuenow={progress.solved} aria-valuemax={progress.total}>
@@ -72,22 +73,25 @@ export function Study({ deck, onExit }: { deck: Deck; onExit: () => void }) {
           <div className="message-box">
             <div className="message-emoji">📡</div>
             <p>{phase.message}</p>
-            <button className="btn filled" onClick={load}>Nochmal versuchen</button>
+            <button className="btn filled" onClick={load}>{t('Nochmal versuchen')}</button>
           </div>
         )}
         {phase.kind === 'empty' && (
           <div className="message-box">
             <div className="message-emoji">🗂️</div>
-            <p>In diesem Stapel sind noch keine Karten.</p>
-            <button className="btn filled" onClick={onExit}>Zurück</button>
+            <p>{t('In diesem Stapel sind noch keine Karten.')}</p>
+            <button className="btn filled" onClick={onExit}>{t('Zurück')}</button>
           </div>
         )}
         {phase.kind === 'round-intro' && (
           <div className="message-box">
             <div className="message-emoji">💪</div>
-            <h2>Runde {phase.round}</h2>
-            <p>Super, {progress.solved} von {progress.total} Karten sitzen schon!<br />Jetzt üben wir die {phase.count} {phase.count === 1 ? 'Karte' : 'Karten'}, die noch nicht geklappt {phase.count === 1 ? 'hat' : 'haben'}.</p>
-            <button className="btn filled large" onClick={() => setPhase({ kind: 'card' })}>Weiter</button>
+            <h2>{t('Runde {n}', { n: phase.round })}</h2>
+            <p>
+              {t('Super, {solved} von {total} Karten sitzen schon!', { solved: progress.solved, total: progress.total })}<br />
+              {phase.count === 1 ? t('Jetzt üben wir die Karte, die noch nicht geklappt hat.') : t('Jetzt üben wir die {n} Karten, die noch nicht geklappt haben.', { n: phase.count })}
+            </p>
+            <button className="btn filled large" onClick={() => setPhase({ kind: 'card' })}>{t('Weiter')}</button>
           </div>
         )}
         {phase.kind === 'card' && queue[index] && (
@@ -97,15 +101,15 @@ export function Study({ deck, onExit }: { deck: Deck; onExit: () => void }) {
         {phase.kind === 'finished' && (
           <div className="message-box finished">
             <div className="confetti" aria-hidden="true">{['🎉', '⭐', '🎊', '✨', '🌟'].map((c, i) => <span key={i} style={{ animationDelay: `${i * 0.15}s` }}>{c}</span>)}</div>
-            <h2>Geschafft!</h2>
-            <p>Du hast alle {phase.summary.cards} Karten richtig beantwortet.</p>
+            <h2>{t('Geschafft!')}</h2>
+            <p>{t('Du hast alle {n} Karten richtig beantwortet.', { n: phase.summary.cards })}</p>
             <div className="result-chips">
-              <span className="chip">{phase.summary.rounds} {phase.summary.rounds === 1 ? 'Runde' : 'Runden'}</span>
-              {phase.summary.wrong === 0 ? <span className="chip success">Alles auf Anhieb richtig!</span> : <span className="chip">{phase.summary.wrong}× geübt</span>}
+              <span className="chip">{phase.summary.rounds === 1 ? t('1 Runde') : t('{n} Runden', { n: phase.summary.rounds })}</span>
+              {phase.summary.wrong === 0 ? <span className="chip success">{t('Alles auf Anhieb richtig!')}</span> : <span className="chip">{t('{n}× geübt', { n: phase.summary.wrong })}</span>}
             </div>
             <div className="button-stack">
-              <button className="btn filled large" onClick={onExit}>Fertig</button>
-              <button className="btn outlined" onClick={restart}>Nochmal von vorne</button>
+              <button className="btn filled large" onClick={onExit}>{t('Fertig')}</button>
+              <button className="btn outlined" onClick={restart}>{t('Nochmal von vorne')}</button>
             </div>
           </div>
         )}
@@ -164,14 +168,14 @@ function CardView({ deckId, card, onDone, onError }: { deckId: number; card: Stu
         <div className="flashcard-inner">
           <div className="face front">
             {card.questionImage && <img src={imageUrl(card.questionImage)} alt="" />}
-            {card.question && <div className="card-text">{card.question}</div>}
-            {card.type === 'flip' && <div className="hint">Tippe zum Umdrehen</div>}
+            {card.question && <div className="card-text" dir="auto">{card.question}</div>}
+            {card.type === 'flip' && <div className="hint">{t('Tippe zum Umdrehen')}</div>}
           </div>
           {card.type === 'flip' && (
             <div className="face back">
-              {card.question && <div className="back-question">{card.question}</div>}
+              {card.question && <div className="back-question" dir="auto">{card.question}</div>}
               {card.answerImage && <img src={imageUrl(card.answerImage)} alt="" />}
-              {card.answer && <div className="card-text">{card.answer}</div>}
+              {card.answer && <div className="card-text" dir="auto">{card.answer}</div>}
             </div>
           )}
         </div>
@@ -179,8 +183,8 @@ function CardView({ deckId, card, onDone, onError }: { deckId: number; card: Stu
 
       {card.type === 'flip' && flipped && (
         <div className="answer-row">
-          <button className="btn tonal error-tone large" disabled={busy} onClick={() => void send({ knew: false })}>✗ Wusste ich nicht</button>
-          <button className="btn filled success-tone large" disabled={busy} onClick={() => void send({ knew: true })}>✓ Wusste ich</button>
+          <button className="btn tonal error-tone large" disabled={busy} onClick={() => void send({ knew: false })}>{t('✗ Wusste ich nicht')}</button>
+          <button className="btn filled success-tone large" disabled={busy} onClick={() => void send({ knew: true })}>{t('✓ Wusste ich')}</button>
         </div>
       )}
 
@@ -188,40 +192,40 @@ function CardView({ deckId, card, onDone, onError }: { deckId: number; card: Stu
         <form className="input-answer" onSubmit={submitText}>
           <div className={`text-field ${result ? (result.correct ? 'is-correct' : 'is-wrong') : ''}`}>
             <input value={text} onChange={(e) => setText(e.target.value)} placeholder=" " id="answer" disabled={!!result || busy}
-              autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} autoFocus />
-            <label htmlFor="answer">Deine Antwort</label>
+              autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} autoFocus dir="auto" />
+            <label htmlFor="answer">{t('Deine Antwort')}</label>
           </div>
-          {!result && <button className="btn filled large" disabled={busy || !text.trim()}>Prüfen</button>}
+          {!result && <button className="btn filled large" disabled={busy || !text.trim()}>{t('Prüfen')}</button>}
         </form>
       )}
 
       {card.type === 'choice' && (
         <div className="choices">
-          {card.multiple && !result && <div className="hint">Mehrere Antworten können richtig sein.</div>}
+          {card.multiple && !result && <div className="hint">{t('Mehrere Antworten können richtig sein.')}</div>}
           {options.map((o) => {
             const isChosen = chosen.includes(o.id);
             const state = result ? (correctIds.includes(o.id) ? 'correct' : isChosen ? 'wrong' : 'dim') : isChosen ? 'chosen' : '';
             return (
               <button key={o.id} className={`choice ${state}`} onClick={() => toggleOption(o.id)} disabled={busy} aria-pressed={isChosen}>
                 <span className={`choice-mark ${card.multiple ? 'square' : ''}`}>{result ? (correctIds.includes(o.id) ? '✓' : isChosen ? '✗' : '') : isChosen ? '✓' : ''}</span>
-                {o.text}
+                <span dir="auto">{o.text}</span>
               </button>
             );
           })}
-          {!result && <button className="btn filled large" disabled={busy || chosen.length === 0} onClick={() => void send({ optionIds: chosen })}>Prüfen</button>}
+          {!result && <button className="btn filled large" disabled={busy || chosen.length === 0} onClick={() => void send({ optionIds: chosen })}>{t('Prüfen')}</button>}
         </div>
       )}
 
       {result && (
         <div className={`feedback ${result.correct ? 'correct' : 'wrong'}`}>
-          <div className="feedback-title">{result.correct ? '🎉 Richtig!' : '🤔 Leider nicht richtig'}</div>
+          <div className="feedback-title">{result.correct ? t('🎉 Richtig!') : t('🤔 Leider nicht richtig')}</div>
           {!result.correct && card.type === 'input' && result.solution.acceptedAnswers && (
-            <div className="feedback-solution">Richtig wäre: <strong>{result.solution.acceptedAnswers[0]}</strong></div>
+            <div className="feedback-solution">{t('Richtig wäre:')} <strong dir="auto">{result.solution.acceptedAnswers[0]}</strong></div>
           )}
           {result.solution.answerImage && <img src={imageUrl(result.solution.answerImage)} alt="" />}
-          {result.solution.answer && <div className="feedback-text">{result.solution.answer}</div>}
-          {!result.correct && <div className="feedback-note">Kein Problem – die Karte kommt in der nächsten Runde nochmal.</div>}
-          <button ref={continueBtn} className="btn filled large" onClick={() => onDone(result)}>Weiter</button>
+          {result.solution.answer && <div className="feedback-text" dir="auto">{result.solution.answer}</div>}
+          {!result.correct && <div className="feedback-note">{t('Kein Problem – die Karte kommt in der nächsten Runde nochmal.')}</div>}
+          <button ref={continueBtn} className="btn filled large" onClick={() => onDone(result)}>{t('Weiter')}</button>
         </div>
       )}
     </div>

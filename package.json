@@ -15,7 +15,7 @@
     "dev:betreuer": "npm run dev -w apps/betreuer",
     "dev:kinder": "npm run dev -w apps/kinder",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w apps/betreuer && npm run typecheck -w apps/kinder",
-    "test": "npm test -w server",
+    "test": "npm test -w server && node tools/check-translations.ts",
     "cli": "npm run cli -w server --"
   },
   "engines": {

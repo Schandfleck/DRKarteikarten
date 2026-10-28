@@ -1,4 +1,5 @@
 // Typen der Server-Antworten (siehe server/src/routes/*)
+import { getLanguage, locale, t, tKey, type Language } from './i18n.ts';
 
 export type Role = 'admin' | 'betreuer' | 'kind';
 export type CardType = 'flip' | 'input' | 'choice';
@@ -13,6 +14,7 @@ export interface User {
   locked: boolean;
   lastLoginAt: string | null;
   createdAt: string;
+  language: Language | null;
 }
 
 export interface ChildListItem extends User {
@@ -99,16 +101,14 @@ export class ApiError extends Error {
 /** Wird ausgelöst, wenn die Anmeldung abgelaufen ist – die App zeigt dann wieder die Anmeldeseite. */
 export const SESSION_EXPIRED = 'kk:session-expired';
 
-const OFFLINE_MESSAGE = 'Keine Internetverbindung. Bitte prüfe die Netzwerkverbindung.';
-
 /**
  * Unterscheidet "Gerät offline" von "Server nicht erreichbar" (z. B. Server gestoppt oder Wartung).
  * 502/503/504 ohne eigene Fehlermeldung kommen vom vorgeschalteten Proxy (Caddy/Vite), wenn der Server nicht läuft.
  */
 function connectionError(): ApiError {
   return navigator.onLine === false
-    ? new ApiError(0, OFFLINE_MESSAGE)
-    : new ApiError(0, 'Der Server ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten noch einmal.');
+    ? new ApiError(0, t('Keine Internetverbindung. Bitte prüfe die Netzwerkverbindung.'))
+    : new ApiError(0, t('Der Server ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten noch einmal.'));
 }
 
 async function request<T>(method: string, path: string, body?: unknown, contentType = 'application/json'): Promise<T> {
@@ -117,7 +117,7 @@ async function request<T>(method: string, path: string, body?: unknown, contentT
     res = await fetch(`/api${path}`, {
       method,
       credentials: 'same-origin',
-      headers: { 'x-kk-app': 'betreuer', ...(body !== undefined ? { 'content-type': contentType } : {}) },
+      headers: { 'x-kk-app': 'betreuer', 'x-kk-lang': getLanguage(), ...(body !== undefined ? { 'content-type': contentType } : {}) },
       body: body === undefined ? undefined : body instanceof Blob ? body : JSON.stringify(body),
     });
   } catch {
@@ -127,7 +127,7 @@ async function request<T>(method: string, path: string, body?: unknown, contentT
   if (!res.ok) {
     if ([502, 503, 504].includes(res.status) && !(data as { error?: string }).error) throw connectionError();
     if (res.status === 401 && path !== '/auth/login') window.dispatchEvent(new Event(SESSION_EXPIRED));
-    throw new ApiError(res.status, (data as { error?: string }).error ?? `Fehler ${res.status}`);
+    throw new ApiError(res.status, (data as { error?: string }).error ?? t('Fehler {status}', { status: res.status }));
   }
   return data as T;
 }
@@ -147,17 +147,18 @@ export function formatDate(iso: string | null | undefined, withTime = true): str
   if (!iso) return '–';
   const d = new Date(iso);
   return withTime
-    ? d.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-    : d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    ? d.toLocaleString(locale(), { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleDateString(locale(), { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+/** Anzeige immer mit t(…) übersetzen, z. B. t(CARD_TYPE_LABELS[card.type]). */
 export const CARD_TYPE_LABELS: Record<CardType, string> = {
-  flip: 'Vorder-/Rückseite',
-  input: 'Antwort eintippen',
-  choice: 'Multiple Choice',
+  flip: tKey('Vorder-/Rückseite'),
+  input: tKey('Antwort eintippen'),
+  choice: tKey('Multiple Choice'),
 };
 
-export const ROLE_LABELS: Record<Role, string> = { admin: 'Admin', betreuer: 'Betreuer', kind: 'Kind' };
+export const ROLE_LABELS: Record<Role, string> = { admin: tKey('Admin'), betreuer: tKey('Betreuer'), kind: tKey('Kind') };
 
 /** Schlägt aus einem Namen einen Benutzernamen vor: "Max Müller" → "max.mueller" */
 export function suggestUsername(name: string): string {

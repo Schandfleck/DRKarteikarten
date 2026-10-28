@@ -26,7 +26,7 @@ Die Datenbank ist wie eine Excel-Datei mit mehreren Tabellenblättern:
 
 | Tabelle | Inhalt |
 |---|---|
-| `users` | Alle Konten (Admins, Betreuer, Kinder): Name, Benutzername, Rolle, **Passwort-Hash** |
+| `users` | Alle Konten (Admins, Betreuer, Kinder): Name, Benutzername, Rolle, gewählte Sprache, **Passwort-Hash** |
 | `sessions` | Wer gerade angemeldet ist (nur ein Fingerabdruck des Anmelde-Tokens) |
 | `decks` | Kartenstapel (Titel, Beschreibung) |
 | `cards` | Die einzelnen Karten: Typ, Frage, Antwort, richtige Antworten, Verweis auf Bilder |
