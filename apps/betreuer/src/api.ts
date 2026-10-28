@@ -99,6 +99,18 @@ export class ApiError extends Error {
 /** Wird ausgelöst, wenn die Anmeldung abgelaufen ist – die App zeigt dann wieder die Anmeldeseite. */
 export const SESSION_EXPIRED = 'kk:session-expired';
 
+const OFFLINE_MESSAGE = 'Keine Internetverbindung. Bitte prüfe die Netzwerkverbindung.';
+
+/**
+ * Unterscheidet "Gerät offline" von "Server nicht erreichbar" (z. B. Server gestoppt oder Wartung).
+ * 502/503/504 ohne eigene Fehlermeldung kommen vom vorgeschalteten Proxy (Caddy/Vite), wenn der Server nicht läuft.
+ */
+function connectionError(): ApiError {
+  return navigator.onLine === false
+    ? new ApiError(0, OFFLINE_MESSAGE)
+    : new ApiError(0, 'Der Server ist gerade nicht erreichbar. Bitte versuche es in ein paar Minuten noch einmal.');
+}
+
 async function request<T>(method: string, path: string, body?: unknown, contentType = 'application/json'): Promise<T> {
   let res: Response;
   try {
@@ -109,10 +121,11 @@ async function request<T>(method: string, path: string, body?: unknown, contentT
       body: body === undefined ? undefined : body instanceof Blob ? body : JSON.stringify(body),
     });
   } catch {
-    throw new ApiError(0, 'Keine Verbindung zum Server. Bitte Internetverbindung prüfen.');
+    throw connectionError();
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if ([502, 503, 504].includes(res.status) && !(data as { error?: string }).error) throw connectionError();
     if (res.status === 401 && path !== '/auth/login') window.dispatchEvent(new Event(SESSION_EXPIRED));
     throw new ApiError(res.status, (data as { error?: string }).error ?? `Fehler ${res.status}`);
   }
