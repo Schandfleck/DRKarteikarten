@@ -7,9 +7,6 @@ Lernsystem für Kinder mit Betreuer-Website und Kinder-App (installierbar auf de
 
 # Installation auf einem Server – Schritt für Schritt
 
-Diese Anleitung ist für jemanden geschrieben, der noch nie einen Server eingerichtet hat.
-Alles, was du eintippen musst, steht in grauen Kästen. Tippe die Zeilen nacheinander ein und drücke jeweils Enter.
-
 ## Was du brauchst
 
 1. **Einen Linux-Server** (z. B. bei Hetzner, IONOS oder Strato; Ubuntu reicht, 2 GB Arbeitsspeicher reichen).
