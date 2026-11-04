@@ -177,3 +177,8 @@ Die Daten bleiben erhalten, die Datenbank passt sich beim Start automatisch an.
 | Alles stoppen | `docker compose down` (die Daten in `data/` bleiben) |
 
 Mehr zu Speicherorten und Sicherheit: [docs/DATEN-UND-SICHERHEIT.md](docs/DATEN-UND-SICHERHEIT.md)
+
+
+# BUGS
+
+Bei Bugs oder Wünschen bitte Issue erstellen
