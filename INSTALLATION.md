@@ -161,6 +161,7 @@ Die Daten bleiben erhalten, die Datenbank passt sich beim Start automatisch an.
 | Problem | Lösung |
 |---|---|
 | Seite lädt nicht | `docker compose logs --tail=50 app` und `docker compose logs --tail=50 caddy` zeigen die Fehlermeldung |
+| Im Log steht `unable to open database file` und `app` startet ständig neu | Schritt 6 wurde übersprungen: `chown 1000:1000 data` ausführen, dann `docker compose restart app` |
 | Kein HTTPS-Schloss / Zertifikatsfehler | Zeigt die Domain wirklich auf den Server? Sind Port 80 und 443 offen? Caddy versucht es automatisch weiter |
 | „Server nicht erreichbar“ in der App | `docker compose ps` – läuft `app`? Sonst `docker compose restart app` |
 | Admin-Passwort vergessen | `docker compose exec app node server/src/cli.ts reset-password <benutzername>` |

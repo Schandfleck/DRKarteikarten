@@ -34,6 +34,8 @@ function png(svg: string, size: number, file: string): void {
 }
 
 const cleanSvg = `${open}${bg}${motif}${close}`.replace(comments!, '\n');
+// Nach "git clone" fehlt apps/betreuer/public/ (enthält nur erzeugte Dateien, Git speichert leere Ordner nicht)
+for (const dir of [kinder, betreuer]) fs.mkdirSync(dir, { recursive: true });
 fs.writeFileSync(path.join(kinder, 'icon.svg'), cleanSvg);
 fs.writeFileSync(path.join(betreuer, 'icon.svg'), cleanSvg);
 png(cleanSvg, 192, path.join(kinder, 'icon-192.png'));
