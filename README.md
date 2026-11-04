@@ -1,118 +1,182 @@
 # Karteikarten
 
-Lernsystem mit zwei Oberflächen und einem gemeinsamen Server:
+Lernsystem für Kinder mit Betreuer-Website und Kinder-App (installierbar auf dem Handy). Betreuer legen Kinderkonten und Kartenstapel an, Kinder lernen in Runden, bis alle Karten sitzen.
 
-| Teil | Adresse | Für wen |
-|---|---|---|
-| **Kinder-App** (PWA, installierbar auf iOS/Android) | `https://<domain>/` | Kinder lernen ihre Karteikarten |
-| **Betreuer-Website** | `https://<domain>/betreuer/` | Betreuer verwalten Kinder, Stapel und Karten |
+- Was das Programm kann und wie es technisch aufgebaut ist: [docs/UEBERSICHT.md](docs/UEBERSICHT.md)
+- Wo Daten liegen und wie sie geschützt sind: [docs/DATEN-UND-SICHERHEIT.md](docs/DATEN-UND-SICHERHEIT.md)
 
-**Ein Link für alle:** Kinder und Betreuer melden sich gemeinsam unter `https://<domain>/` an. Der Server erkennt am Konto, wer sich anmeldet; Betreuer werden automatisch zur Betreuer-Website weitergeleitet.
-| **Server + Datenbank** | `https://<domain>/api/…` | speichert alles zentral |
+# Installation auf einem Server – Schritt für Schritt
 
-## Funktionen
+Diese Anleitung ist für jemanden geschrieben, der noch nie einen Server eingerichtet hat.
+Alles, was du eintippen musst, steht in grauen Kästen. Tippe die Zeilen nacheinander ein und drücke jeweils Enter.
 
-**Betreuer-Website**
-- Kinderkonten anlegen (Benutzername + Passwort), Passwort neu vergeben, sperren/entsperren, deaktivieren, löschen
-- Kartenstapel anlegen, bearbeiten, kopieren (z. B. als Vorlage für eine andere Ausbildung)
-- Drei Kartentypen, frei wählbar pro Karte:
-  - **Vorder-/Rückseite**: Text und/oder Bild, das Kind bewertet sich selbst
-  - **Antwort eintippen**: automatische Prüfung, mehrere richtige Schreibweisen möglich
-  - **Multiple Choice**: eine oder mehrere richtige Antworten
-- Jede Karte kann Bilder und eine kurze Erklärung haben; die Live-Vorschau zeigt, wie sie in der App aussieht
-- Stapel einzeln pro Kind zuteilen, Lernfortschritt pro Kind und Karte einsehen
-- Rollen: **Admin** (verwaltet zusätzlich Betreuer-Konten und sieht das Protokoll) und **Betreuer**
-- Protokoll: wer hat wann was geändert
+## Was du brauchst
 
-**Kinder-App**
-- Lernen in Runden, bis alle Karten einmal richtig beantwortet sind. Falsch beantwortete Karten kommen in die nächste Runde.
-- Der Lernstand liegt auf dem Server. Wer die App schließt, macht später genau dort weiter (auch auf einem anderen Gerät).
-- Über „Zum Startbildschirm hinzufügen“ wie eine normale App installierbar
+1. **Einen Linux-Server** (z. B. bei Hetzner, IONOS oder Strato; Ubuntu reicht, 2 GB Arbeitsspeicher reichen).
+2. **Eine Domain**, z. B. `karteikarten.meine-firma.de`, die auf die IP-Adresse des Servers zeigt
+   (das stellt man beim Domain-Anbieter unter „DNS“ ein: ein **A-Eintrag** mit der Server-IP).
+3. **Zugang zum Server** per SSH (Benutzername, Passwort oder Schlüssel – bekommt man vom Hoster).
 
-**Sprachen**
-- Deutsch und Arabisch (mit gespiegeltem Layout von rechts nach links), umschaltbar über das Zahnrad bzw. „Einstellungen“
-- Die Sprache wird im Konto gespeichert und gilt auf allen Geräten; vor der Anmeldung merkt sich das Gerät die Auswahl
-- Texte stehen in `apps/*/src/locales/ar.ts` und `server/src/lib/i18n.ts`; `npm test` meldet fehlende Übersetzungen
-- Karteninhalte (Fragen, Antworten) übersetzt die App nicht – sie erscheinen so, wie der Betreuer sie eingibt
+Alles Weitere (HTTPS-Zertifikat, Datenbank usw.) richtet sich automatisch ein.
 
-## Technik
+## Schritt 1: Auf dem Server anmelden
 
-- **Node.js 26** (TypeScript läuft direkt ohne Build-Schritt)
-- **SQLite** als Datenbank (eingebaut in Node, eine einzige Datei)
-- **Argon2id** für Passwörter (eingebaut in Node)
-- **Express** (Server), **React + Vite** (Oberflächen), Material Design 3
-- Nur drei Server-Abhängigkeiten: `express`, `helmet`, `zod`
-
-Später kann eine **native App** (App Store / Play Store) dazukommen, ohne den Server umzubauen: Die Anmeldung unterstützt dafür bereits Tokens (`client: "native"` → `Authorization: Bearer …`).
-
-## Lokal ausprobieren
+Am eigenen Rechner ein Terminal öffnen (Windows: PowerShell) und eintippen:
 
 ```bash
-npm install
+ssh root@<IP-Adresse-des-Servers>
 ```
+
+## Schritt 2: Docker installieren (einmalig)
 
 ```bash
-npm run build
+curl -fsSL https://get.docker.com | sh
 ```
+
+Prüfen, ob es geklappt hat:
 
 ```bash
-npm run cli -- demo
+docker compose version
 ```
+
+Es muss eine Versionsnummer erscheinen.
+
+## Schritt 3: Firewall – nur Webseiten-Ports öffnen
 
 ```bash
-npm start
+ufw allow OpenSSH
+ufw allow 80
+ufw allow 443
+ufw --force enable
 ```
 
-`demo` legt einen Admin, ein Kind und einen Beispielstapel an. Die Zugangsdaten stehen danach in `data/DEMO-ZUGANG.txt`. Für ein echtes System stattdessen `npm run cli -- create-admin` verwenden.
+Damit ist von außen nur noch HTTPS (und dein SSH-Zugang) erreichbar. Die Datenbank ist von außen nie erreichbar.
 
-Entwicklung mit automatischem Neuladen: `npm run dev:server` plus `npm run dev:betreuer` (Port 5173) oder `npm run dev:kinder` (Port 5174).
+## Schritt 4: Das Programm auf den Server kopieren
 
-Prüfungen: `npm test` (41 automatische Tests, davon 21 reine Sicherheitstests in `server/test/security.test.ts`) und `npm run typecheck`.
+1. Am eigenen Rechner auf der GitHub-Seite des Projekts rechts unter **Releases** die neueste Version öffnen und die Datei `karteikarten-<version>.tar.gz` herunterladen.
+2. Die Datei auf den Server hochladen (am eigenen Rechner ausführen, im Ordner mit der heruntergeladenen Datei):
 
-## Auf einem Server betreiben (Docker)
-
-Voraussetzungen: Linux-Server mit Docker und eine Domain, die per DNS auf den Server zeigt.
-
-1. Projekt auf den Server kopieren
-2. `cp .env.example .env` und die Domain in `.env` sowie im `Caddyfile` eintragen
-3. Starten (Caddy holt automatisch ein HTTPS-Zertifikat):
    ```bash
-   docker compose up -d --build
+   scp karteikarten-*.tar.gz root@<IP-Adresse-des-Servers>:/root/
    ```
-4. Ersten Admin anlegen:
+
+3. Auf dem Server entpacken und in den Ordner wechseln:
+
    ```bash
-   docker compose exec app node server/src/cli.ts create-admin
+   cd /root
+   tar xzf karteikarten-*.tar.gz
+   mv karteikarten-*/ karteikarten
+   cd karteikarten
    ```
-5. `https://<domain>/` öffnen und anmelden (Betreuer landen automatisch auf der Betreuer-Website)
 
-**Updates:** neuen Code kopieren, dann erneut `docker compose up -d --build`. Datenbank-Änderungen laufen beim Start automatisch.
+Alternative für Entwickler mit Zugriff auf das Repository: `git clone git@github.com:Schandfleck/DRKarteikarten.git karteikarten && cd karteikarten`
 
-## Verwaltungsbefehle
+## Schritt 5: Domain eintragen
 
-| Befehl | Zweck |
+Zwei Dateien müssen deine Domain kennen.
+
+1. Einstellungsdatei anlegen:
+
+   ```bash
+   cp .env.example .env
+   nano .env
+   ```
+
+   Die Zeile `PUBLIC_ORIGIN=https://karteikarten.example.de` auf deine Domain ändern, z. B.
+   `PUBLIC_ORIGIN=https://karteikarten.meine-firma.de`. Speichern mit `Strg+O`, Enter, beenden mit `Strg+X`.
+
+2. HTTPS-Datei anpassen:
+
+   ```bash
+   nano Caddyfile
+   ```
+
+   In der ersten Zeile `karteikarten.example.de` durch deine Domain ersetzen. Speichern wie oben.
+
+## Schritt 6: Datenordner anlegen
+
+Hier landen später Datenbank und Bilder. Das Programm läuft aus Sicherheitsgründen nicht als Administrator, deshalb bekommt es den Ordner übertragen:
+
+```bash
+mkdir -p data
+chown 1000:1000 data
+```
+
+## Schritt 7: Starten
+
+```bash
+docker compose up -d --build
+```
+
+Der erste Start dauert einige Minuten (das Programm wird gebaut). Danach läuft es dauerhaft, auch nach einem Neustart des Servers.
+
+Nachsehen, ob alles läuft:
+
+```bash
+docker compose ps
+```
+
+Beide Zeilen (`app` und `caddy`) müssen `running` bzw. `Up` zeigen.
+
+## Schritt 8: Ersten Admin anlegen
+
+```bash
+docker compose exec app node server/src/cli.ts create-admin
+```
+
+Benutzername, Anzeigename und ein Passwort (mindestens 10 Zeichen) eingeben. Das Passwort ist beim Tippen unsichtbar.
+
+## Schritt 9: Fertig – ausprobieren
+
+Im Browser `https://deine-domain.de` öffnen und mit dem Admin anmelden. Du landest automatisch auf der Betreuer-Website.
+Dort legst du Betreuer, Kinder und Kartenstapel an. Kinder melden sich unter derselben Adresse an.
+
+**Wichtig:** Die Seite funktioniert nur über `https://` (mit Schloss-Symbol). Über `http://` oder direkt über die IP-Adresse ist eine Anmeldung absichtlich nicht möglich.
+
+---
+
+## Später: Sicherung (Backup)
+
+Tägliche Sicherung von Datenbank und Bildern nach `data/backups`:
+
+```bash
+docker compose exec app node server/src/cli.ts backup /data/backups
+```
+
+Automatisch jede Nacht um 3 Uhr:
+
+```bash
+(crontab -l 2>/dev/null; echo "0 3 * * * cd /root/karteikarten && docker compose exec -T app node server/src/cli.ts backup /data/backups") | crontab -
+```
+
+Den Ordner `data/backups` zusätzlich regelmäßig woandershin kopieren (z. B. auf einen Rechner in der Firma), damit die Sicherung einen Serverausfall überlebt.
+
+## Später: Update einspielen
+
+Das neue Release-Archiv wie in Schritt 4 herunterladen und hochladen, dann auf dem Server über den bestehenden Ordner entpacken und neu bauen:
+
+```bash
+cd /root
+tar xzf karteikarten-*.tar.gz
+cp -r karteikarten-*/. karteikarten/
+rm -r karteikarten-*/
+cd karteikarten
+docker compose up -d --build
+```
+
+Die Daten bleiben erhalten, die Datenbank passt sich beim Start automatisch an.
+
+## Wenn etwas nicht klappt
+
+| Problem | Lösung |
 |---|---|
-| `create-admin [name]` | Admin-Konto anlegen |
-| `reset-password <name>` | Passwort eines Kontos neu setzen (z. B. wenn der Admin seins vergessen hat) |
-| `backup [ordner]` | Sicherung von Datenbank und Bildern |
-| `demo` | Beispieldaten (nur in leerer Datenbank) |
+| Seite lädt nicht | `docker compose logs --tail=50 app` und `docker compose logs --tail=50 caddy` zeigen die Fehlermeldung |
+| Im Log steht `unable to open database file` und `app` startet ständig neu | Schritt 6 wurde übersprungen: `chown 1000:1000 data` ausführen, dann `docker compose restart app` |
+| Kein HTTPS-Schloss / Zertifikatsfehler | Zeigt die Domain wirklich auf den Server? Sind Port 80 und 443 offen? Caddy versucht es automatisch weiter |
+| „Server nicht erreichbar“ in der App | `docker compose ps` – läuft `app`? Sonst `docker compose restart app` |
+| Admin-Passwort vergessen | `docker compose exec app node server/src/cli.ts reset-password <benutzername>` |
+| Alles neu starten | `docker compose restart` |
+| Alles stoppen | `docker compose down` (die Daten in `data/` bleiben) |
 
-Lokal: `npm run cli -- <befehl>`. In Docker: `docker compose exec app node server/src/cli.ts <befehl>`.
-
-## Projektaufbau
-
-```
-server/            Server (API, Datenbank, Sicherheit)
-  src/db.ts          Datenbank-Schema
-  src/security/      Passwörter, Anmeldung, Schutz vor Durchprobieren
-  src/routes/        Schnittstellen (auth, staff, children, decks, child, uploads, audit)
-  src/lib/study.ts   Lernlogik „Runden bis alles richtig“
-  test/              automatische Tests
-apps/betreuer/     Betreuer-Website (React)
-apps/kinder/       Kinder-App (React, PWA)
-assets/logo.svg    EINZIGE Vorlage für Logo und App-Symbole (PNGs entstehen beim Bauen)
-tools/             Build-Helfer: App-Symbole erzeugen, Lizenzdatei erstellen
-data/              ALLE gespeicherten Daten (nicht im Git!)
-docs/              Erklärungen zu Daten & Sicherheit
-```
-
-Mehr zu Speicherorten, Sicherheit und Backups: [docs/DATEN-UND-SICHERHEIT.md](docs/DATEN-UND-SICHERHEIT.md)
+Mehr zu Speicherorten und Sicherheit: [docs/DATEN-UND-SICHERHEIT.md](docs/DATEN-UND-SICHERHEIT.md)

@@ -1,0 +1,4 @@
+# Nicht Teil des Release-Archivs (git archive)
+.claude/ export-ignore
+.gitattributes export-ignore
+server/test/ export-ignore
