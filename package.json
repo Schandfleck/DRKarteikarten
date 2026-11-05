@@ -1,7 +1,7 @@
 {
   "name": "karteikarten",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Karteikarten-System: Betreuer-Website und Kinder-App mit gemeinsamem Server",
   "workspaces": [
     "server",
