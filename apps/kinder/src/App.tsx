@@ -122,15 +122,15 @@ function Login({ onLogin, onSettings }: { onLogin: (u: User) => void; onSettings
         <p>{t('Melde dich mit deinen Zugangsdaten an.')}</p>
         {error && <div className="error-box">{error}</div>}
         <div className="text-field">
-          <input id="username" placeholder=" " value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoCapitalize="none" autoCorrect="off" spellCheck={false} required />
+          <input id="username" placeholder=" " value={username} onChange={(e) => setUsername(e.currentTarget.value)} autoComplete="username" autoCapitalize="none" autoCorrect="off" spellcheck={false} required />
           <label htmlFor="username">{t('Benutzername')}</label>
         </div>
         <div className="text-field">
-          <input id="password" placeholder=" " type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+          <input id="password" placeholder=" " type="password" value={password} onChange={(e) => setPassword(e.currentTarget.value)} autoComplete="current-password" required />
           <label htmlFor="password">{t('Passwort')}</label>
         </div>
         <label className="remember">
-          <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+          <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.currentTarget.checked)} />
           <span>
             {t('Angemeldet bleiben')}
             <small>{t('Nur auf deinem eigenen Gerät anhaken.')}</small>

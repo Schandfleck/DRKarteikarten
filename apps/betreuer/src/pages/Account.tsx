@@ -38,11 +38,11 @@ export function AccountPage() {
       <form className="panel narrow" onSubmit={submit}>
         <h2>{t('Passwort ändern')}</h2>
         {error && <div className="alert alert-error">{error}</div>}
-        <Field label={t('Aktuelles Passwort')}><input type="password" value={currentPassword} onChange={(e) => setCurrent(e.target.value)} required autoComplete="current-password" /></Field>
+        <Field label={t('Aktuelles Passwort')}><input type="password" value={currentPassword} onChange={(e) => setCurrent(e.currentTarget.value)} required autoComplete="current-password" /></Field>
         <Field label={t('Neues Passwort')} hint={t('Mindestens 10 Zeichen. Am besten ein Satz oder mehrere Wörter.')}>
-          <input type="password" value={newPassword} onChange={(e) => setNew(e.target.value)} required minLength={10} autoComplete="new-password" />
+          <input type="password" value={newPassword} onChange={(e) => setNew(e.currentTarget.value)} required minLength={10} autoComplete="new-password" />
         </Field>
-        <Field label={t('Neues Passwort wiederholen')}><input type="password" value={repeat} onChange={(e) => setRepeat(e.target.value)} required autoComplete="new-password" /></Field>
+        <Field label={t('Neues Passwort wiederholen')}><input type="password" value={repeat} onChange={(e) => setRepeat(e.currentTarget.value)} required autoComplete="new-password" /></Field>
         <div className="form-actions"><button className="btn btn-primary">{t('Passwort ändern')}</button></div>
       </form>
     </div>

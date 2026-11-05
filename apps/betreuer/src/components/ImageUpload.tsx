@@ -56,7 +56,7 @@ export function ImageUpload({ value, onChange }: { value: string | null; onChang
           {busy ? t('Lädt hoch …') : t('+ Bild hinzufügen')}
         </button>
       )}
-      <input ref={input} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={(e) => void pick(e.target.files?.[0])} />
+      <input ref={input} type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={(e) => void pick(e.currentTarget.files?.[0])} />
     </div>
   );
 }

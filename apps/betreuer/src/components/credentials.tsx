@@ -17,17 +17,10 @@ export function PasswordInput({ value, onChange, forChild, minLength }: { value:
       setVisible(true);
     }
   };
+  const field = { value, onChange: (e: { currentTarget: HTMLInputElement }) => onChange(e.currentTarget.value), minLength, required: true, autoComplete: 'new-password', spellcheck: false };
   return (
     <div className="input-group">
-      <input
-        type={visible ? 'text' : 'password'}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        minLength={minLength}
-        required
-        autoComplete="new-password"
-        spellCheck={false}
-      />
+      {visible ? <input type="text" {...field} /> : <input type="password" {...field} />}
       <button type="button" className="btn" onClick={() => setVisible(!visible)}>{visible ? t('Verbergen') : t('Anzeigen')}</button>
       <button type="button" className="btn" onClick={() => void suggest()}>{t('Vorschlag')}</button>
     </div>

@@ -11,15 +11,25 @@ COPY tools tools
 COPY apps apps
 RUN npm run build
 
-# ---------- 2. Schlankes Laufzeit-Image ----------
-FROM node:26-alpine
+# ---------- 2. Server-Abhängigkeiten (nur Laufzeit, ohne Entwicklungswerkzeuge) ----------
+FROM node:26-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+COPY server/package.json server/
+RUN npm ci --omit=dev --ignore-scripts --workspace server
+
+# ---------- 3. Schlankes Laufzeit-Image: nur Alpine + die Node-Binärdatei, ohne npm/yarn/corepack ----------
+FROM alpine:3.24
+RUN apk add --no-cache libstdc++ libatomic \
+ && addgroup -g 1000 node && adduser -u 1000 -G node -s /bin/sh -D node
+COPY --from=build /usr/local/bin/node /usr/local/bin/node
 ENV NODE_ENV=production \
     DATA_DIR=/data \
     PORT=3000
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json ./
 COPY server/package.json server/
-RUN npm ci --omit=dev --workspace server && npm cache clean --force
+COPY --from=deps /app/node_modules node_modules
 COPY server/src server/src
 COPY --from=build /app/apps/betreuer/dist apps/betreuer/dist
 COPY --from=build /app/apps/kinder/dist apps/kinder/dist

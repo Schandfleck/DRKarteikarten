@@ -40,8 +40,8 @@ Lernsystem mit zwei Oberflächen und einem gemeinsamen Server:
 - **Node.js 26** (TypeScript läuft direkt ohne Build-Schritt)
 - **SQLite** als Datenbank (eingebaut in Node, eine einzige Datei)
 - **Argon2id** für Passwörter (eingebaut in Node)
-- **Express** (Server), **React + Vite** (Oberflächen), Material Design 3
-- Nur drei Server-Abhängigkeiten: `express`, `helmet`, `zod`
+- **Express** (Server), **Preact + Vite** (Oberflächen; Preact ist ein React-Ersatz mit gleicher API und einem Bruchteil der Größe), Material Design 3
+- Nur zwei Server-Abhängigkeiten: `express`, `zod`. Die Oberflächen laden je ca. 15–26 KB JavaScript (gzip).
 
 Später kann eine **native App** (App Store / Play Store) dazukommen, ohne den Server umzubauen: Die Anmeldung unterstützt dafür bereits Tokens (`client: "native"` → `Authorization: Bearer …`).
 

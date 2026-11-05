@@ -30,7 +30,7 @@ export function usePath(): string {
 }
 
 export function Link({ to, children, className }: { to: string; children: ReactNode; className?: string }) {
-  const onClick = (e: MouseEvent) => {
+  const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
     if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
     navigate(to);

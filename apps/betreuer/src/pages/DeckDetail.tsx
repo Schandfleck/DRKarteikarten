@@ -146,7 +146,7 @@ function AssignChildrenModal({ deckId, assigned, onClose, onSaved }: { deckId: n
             {data.map((c) => (
               <label key={c.id} className="check">
                 <input type="checkbox" checked={selected.includes(c.id)}
-                  onChange={(e) => setSelected(e.target.checked ? [...selected, c.id] : selected.filter((x) => x !== c.id))} />
+                  onChange={(e) => setSelected(e.currentTarget.checked ? [...selected, c.id] : selected.filter((x) => x !== c.id))} />
                 <span><bdi>{c.displayName}</bdi>{!c.active && <span className="muted"> {t('(deaktiviert)')}</span>}</span>
               </label>
             ))}

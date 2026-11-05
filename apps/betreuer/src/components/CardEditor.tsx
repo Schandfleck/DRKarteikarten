@@ -76,7 +76,7 @@ export function CardEditor({ deckId, card, onClose, onSaved }: { deckId: number;
 
           <h3 className="editor-section">{t('Vorderseite (Frage)')}</h3>
           <Field label={t('Text')}>
-            <textarea value={form.question} onChange={(e) => set('question', e.target.value)} rows={3} maxLength={2000} placeholder={t('z. B. Welche Nummer hat der Notruf?')} dir="auto" />
+            <textarea value={form.question} onChange={(e) => set('question', e.currentTarget.value)} rows={3} maxLength={2000} placeholder={t('z. B. Welche Nummer hat der Notruf?')} dir="auto" />
           </Field>
           <ImageUpload value={form.questionImage} onChange={(id) => set('questionImage', id)} />
 
@@ -87,7 +87,7 @@ export function CardEditor({ deckId, card, onClose, onSaved }: { deckId: number;
               {form.acceptedAnswers.map((a, i) => (
                 <div className="input-group" key={i}>
                   <input value={a} placeholder={i === 0 ? t('Richtige Antwort') : t('Weitere richtige Schreibweise')} maxLength={300} dir="auto"
-                    onChange={(e) => set('acceptedAnswers', form.acceptedAnswers.map((x, j) => (j === i ? e.target.value : x)))} />
+                    onChange={(e) => set('acceptedAnswers', form.acceptedAnswers.map((x, j) => (j === i ? e.currentTarget.value : x)))} />
                   {form.acceptedAnswers.length > 1 && (
                     <button type="button" className="btn" aria-label={t('Entfernen')} onClick={() => set('acceptedAnswers', form.acceptedAnswers.filter((_, j) => j !== i))}>✕</button>
                   )}
@@ -95,7 +95,7 @@ export function CardEditor({ deckId, card, onClose, onSaved }: { deckId: number;
               ))}
               <div className="button-row">
                 <button type="button" className="btn btn-small" onClick={() => set('acceptedAnswers', [...form.acceptedAnswers, ''])}>{t('+ Schreibweise')}</button>
-                <label className="check"><input type="checkbox" checked={form.caseSensitive} onChange={(e) => set('caseSensitive', e.target.checked)} /> {t('Groß-/Kleinschreibung beachten')}</label>
+                <label className="check"><input type="checkbox" checked={form.caseSensitive} onChange={(e) => set('caseSensitive', e.currentTarget.checked)} /> {t('Groß-/Kleinschreibung beachten')}</label>
               </div>
             </>
           )}
@@ -108,10 +108,10 @@ export function CardEditor({ deckId, card, onClose, onSaved }: { deckId: number;
                 <div className="input-group option-row" key={i}>
                   <label className="option-correct" title={t('Richtig?')}>
                     <input type="checkbox" checked={o.correct}
-                      onChange={(e) => set('options', form.options.map((x, j) => (j === i ? { ...x, correct: e.target.checked } : x)))} />
+                      onChange={(e) => set('options', form.options.map((x, j) => (j === i ? { ...x, correct: e.currentTarget.checked } : x)))} />
                   </label>
                   <input value={o.text} placeholder={t('Antwort {n}', { n: i + 1 })} maxLength={500} dir="auto"
-                    onChange={(e) => set('options', form.options.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)))} />
+                    onChange={(e) => set('options', form.options.map((x, j) => (j === i ? { ...x, text: e.currentTarget.value } : x)))} />
                   {form.options.length > 2 && (
                     <button type="button" className="btn" aria-label={t('Entfernen')} onClick={() => set('options', form.options.filter((_, j) => j !== i))}>✕</button>
                   )}
@@ -126,7 +126,7 @@ export function CardEditor({ deckId, card, onClose, onSaved }: { deckId: number;
           <h3 className="editor-section">{form.type === 'flip' ? t('Rückseite (Antwort)') : t('Erklärung (optional)')}</h3>
           <p className="muted small">{form.type === 'flip' ? t('Das sieht das Kind nach dem Umdrehen.') : t('Wird nach dem Antworten angezeigt – gut für kurze Erklärungen.')}</p>
           <Field label={t('Text')}>
-            <textarea dir="auto" value={form.answer} onChange={(e) => set('answer', e.target.value)} rows={3} maxLength={4000} />
+            <textarea dir="auto" value={form.answer} onChange={(e) => set('answer', e.currentTarget.value)} rows={3} maxLength={4000} />
           </Field>
           <ImageUpload value={form.answerImage} onChange={(id) => set('answerImage', id)} />
         </div>

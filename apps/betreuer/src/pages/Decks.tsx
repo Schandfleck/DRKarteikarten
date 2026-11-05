@@ -26,7 +26,7 @@ export function DecksPage() {
         </EmptyState>
       ) : (
         <>
-          {data.length > 6 && <input className="search" type="search" placeholder={t('Suchen …')} value={search} onChange={(e) => setSearch(e.target.value)} />}
+          {data.length > 6 && <input className="search" type="search" placeholder={t('Suchen …')} value={search} onChange={(e) => setSearch(e.currentTarget.value)} />}
           <div className="deck-grid">
             {list.map((d) => (
               <Link key={d.id} to={`/stapel/${d.id}`} className="deck-tile">
@@ -64,9 +64,9 @@ export function DeckModal({ deck, onClose, onSaved }: { deck?: Deck; onClose: ()
   return (
     <Modal title={deck ? t('Stapel bearbeiten') : t('Neuer Kartenstapel')} onClose={onClose}>
       <form onSubmit={submit}>
-        <Field label={t('Titel')}><input value={title} onChange={(e) => setTitle(e.target.value)} required maxLength={120} placeholder={t('z. B. Erste Hilfe – Grundlagen')} dir="auto" /></Field>
+        <Field label={t('Titel')}><input value={title} onChange={(e) => setTitle(e.currentTarget.value)} required maxLength={120} placeholder={t('z. B. Erste Hilfe – Grundlagen')} dir="auto" /></Field>
         <Field label={t('Beschreibung (optional)')} hint={t('Wird den Kindern in der App angezeigt.')}>
-          <textarea dir="auto" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} maxLength={1000} />
+          <textarea dir="auto" value={description} onChange={(e) => setDescription(e.currentTarget.value)} rows={3} maxLength={1000} />
         </Field>
         <div className="form-actions">
           <button type="button" className="btn" onClick={onClose}>{t('Abbrechen')}</button>

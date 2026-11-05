@@ -191,8 +191,8 @@ function CardView({ deckId, card, onDone, onError }: { deckId: number; card: Stu
       {card.type === 'input' && (
         <form className="input-answer" onSubmit={submitText}>
           <div className={`text-field ${result ? (result.correct ? 'is-correct' : 'is-wrong') : ''}`}>
-            <input value={text} onChange={(e) => setText(e.target.value)} placeholder=" " id="answer" disabled={!!result || busy}
-              autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} autoFocus dir="auto" />
+            <input value={text} onChange={(e) => setText(e.currentTarget.value)} placeholder=" " id="answer" disabled={!!result || busy}
+              autoComplete="off" autoCorrect="off" autoCapitalize="off" spellcheck={false} autoFocus dir="auto" />
             <label htmlFor="answer">{t('Deine Antwort')}</label>
           </div>
           {!result && <button className="btn filled large" disabled={busy || !text.trim()}>{t('Prüfen')}</button>}

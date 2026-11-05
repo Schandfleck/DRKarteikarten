@@ -143,8 +143,8 @@ function EditChildModal({ child, onClose, onSaved }: { child: User; onClose: () 
   return (
     <Modal title={t('Kind bearbeiten')} onClose={onClose}>
       <form onSubmit={submit}>
-        <Field label={t('Name')}><input value={displayName} onChange={(e) => setDisplayName(e.target.value)} required maxLength={80} dir="auto" /></Field>
-        <Field label={t('Benutzername')}><input className="mono" dir="ltr" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase())} required minLength={3} maxLength={32} /></Field>
+        <Field label={t('Name')}><input value={displayName} onChange={(e) => setDisplayName(e.currentTarget.value)} required maxLength={80} dir="auto" /></Field>
+        <Field label={t('Benutzername')}><input className="mono" dir="ltr" value={username} onChange={(e) => setUsername(e.currentTarget.value.toLowerCase())} required minLength={3} maxLength={32} /></Field>
         <div className="form-actions">
           <button type="button" className="btn" onClick={onClose}>{t('Abbrechen')}</button>
           <button className="btn btn-primary">{t('Speichern')}</button>
@@ -191,7 +191,7 @@ function AssignDecksModal({ childId, assigned, onClose, onSaved }: { childId: nu
             {data.map((d) => (
               <label key={d.id} className="check">
                 <input type="checkbox" checked={selected.includes(d.id)}
-                  onChange={(e) => setSelected(e.target.checked ? [...selected, d.id] : selected.filter((x) => x !== d.id))} />
+                  onChange={(e) => setSelected(e.currentTarget.checked ? [...selected, d.id] : selected.filter((x) => x !== d.id))} />
                 <span><bdi>{d.title}</bdi> <span className="muted">({t('{n} Karten', { n: d.cardCount })})</span></span>
               </label>
             ))}

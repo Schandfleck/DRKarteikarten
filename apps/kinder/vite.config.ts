@@ -1,10 +1,12 @@
-import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { thirdPartyLicenses } from '../../tools/third-party-licenses.ts';
 
 export default defineConfig({
   base: '/',
-  plugins: [react(), thirdPartyLicenses('Karteikarten (Kinder-App)')],
+  // Preact statt React: gleiche API, ein Bruchteil der Größe. Der Code importiert weiter "react"/"react-dom".
+  resolve: { alias: { 'react-dom/client': 'preact/compat/client', 'react-dom': 'preact/compat', react: 'preact/compat' } },
+  oxc: { jsx: { importSource: 'preact' } },
+  plugins: [thirdPartyLicenses('Karteikarten (Kinder-App)')],
   server: {
     port: 5174,
     proxy: { '/api': 'http://localhost:3000' },

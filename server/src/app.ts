@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import express, { type NextFunction, type Request, type Response } from 'express';
-import helmet from 'helmet';
 import { config } from './config.ts';
 import { errorHandler, HttpError } from './lib/http.ts';
 import { auditRouter } from './routes/audit.ts';
@@ -23,6 +22,33 @@ function sameOriginOnly(req: Request, _res: Response, next: NextFunction): void 
   if (!origin) return next(); // z. B. native App oder Kommandozeile – dort gibt es kein Cookie-Risiko
   const allowed = config.publicOrigin || `${req.protocol}://${req.get('host')}`;
   if (origin !== allowed) return next(new HttpError(403, 'Anfrage von fremder Seite abgelehnt.'));
+  next();
+}
+
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  ...(config.cookieSecure ? ['upgrade-insecure-requests'] : []),
+].join('; ');
+
+/** Sicherheits-Header gegen eingeschleuste Skripte, Einbetten in fremde Seiten und unverschlüsselte Aufrufe. */
+function securityHeaders(_req: Request, res: Response, next: NextFunction): void {
+  res.setHeader('Content-Security-Policy', CSP);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (config.cookieSecure) res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   next();
 }
 
@@ -53,22 +79,7 @@ export function createApp() {
   app.disable('x-powered-by');
   app.set('trust proxy', config.trustProxy);
 
-  app.use(helmet({
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        'default-src': ["'self'"],
-        'script-src': ["'self'"],
-        'style-src': ["'self'", "'unsafe-inline'"],
-        'img-src': ["'self'", 'data:', 'blob:'],
-        'connect-src': ["'self'"],
-        'frame-ancestors': ["'none'"],
-        'upgrade-insecure-requests': config.cookieSecure ? [] : null,
-      },
-    },
-    strictTransportSecurity: config.cookieSecure,
-    crossOriginEmbedderPolicy: false,
-  }));
+  app.use(securityHeaders);
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });

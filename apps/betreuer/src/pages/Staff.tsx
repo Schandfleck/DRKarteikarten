@@ -72,13 +72,13 @@ function CreateStaffModal({ onClose, onSaved }: { onClose: () => void; onSaved: 
   return (
     <Modal title={t('Betreuer anlegen')} onClose={onClose}>
       <form onSubmit={submit}>
-        <Field label={t('Name')}><input value={displayName} required maxLength={80} dir="auto" onChange={(e) => { setDisplayName(e.target.value); if (!touched) setUsername(suggestUsername(e.target.value)); }} /></Field>
-        <Field label={t('Benutzername')}><input className="mono" dir="ltr" value={username} required minLength={3} maxLength={32} onChange={(e) => { setUsername(e.target.value.toLowerCase()); setTouched(true); }} /></Field>
+        <Field label={t('Name')}><input value={displayName} required maxLength={80} dir="auto" onChange={(e) => { setDisplayName(e.currentTarget.value); if (!touched) setUsername(suggestUsername(e.currentTarget.value)); }} /></Field>
+        <Field label={t('Benutzername')}><input className="mono" dir="ltr" value={username} required minLength={3} maxLength={32} onChange={(e) => { setUsername(e.currentTarget.value.toLowerCase()); setTouched(true); }} /></Field>
         <Field label={t('Erstes Passwort')} hint={t('Mindestens 10 Zeichen. Die Person sollte es nach der ersten Anmeldung unter „Mein Konto“ ändern.')}>
           <PasswordInput value={password} onChange={setPassword} minLength={10} />
         </Field>
         <Field label={t('Rolle')}>
-          <select value={role} onChange={(e) => setRole(e.target.value as 'betreuer' | 'admin')}>
+          <select value={role} onChange={(e) => setRole(e.currentTarget.value as 'betreuer' | 'admin')}>
             <option value="betreuer">{t('Betreuer')}</option>
             <option value="admin">{t('Admin')}</option>
           </select>
@@ -103,9 +103,9 @@ function EditStaffModal({ user, onClose, onSaved }: { user: User; onClose: () =>
   return (
     <Modal title={t('Betreuer bearbeiten')} onClose={onClose}>
       <form onSubmit={submit}>
-        <Field label={t('Name')}><input value={displayName} required maxLength={80} dir="auto" onChange={(e) => setDisplayName(e.target.value)} /></Field>
+        <Field label={t('Name')}><input value={displayName} required maxLength={80} dir="auto" onChange={(e) => setDisplayName(e.currentTarget.value)} /></Field>
         <Field label={t('Rolle')}>
-          <select value={role} onChange={(e) => setRole(e.target.value as User['role'])} disabled={user.id === me.id}>
+          <select value={role} onChange={(e) => setRole(e.currentTarget.value as User['role'])} disabled={user.id === me.id}>
             <option value="betreuer">{t('Betreuer')}</option>
             <option value="admin">{t('Admin')}</option>
           </select>

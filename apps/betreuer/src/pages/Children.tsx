@@ -30,7 +30,7 @@ export function ChildrenPage() {
         </EmptyState>
       ) : (
         <div className="panel">
-          <input className="search" type="search" placeholder={t('Suchen …')} value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input className="search" type="search" placeholder={t('Suchen …')} value={search} onChange={(e) => setSearch(e.currentTarget.value)} />
           <table className="table table-click">
             <thead>
               <tr><th>{t('Name')}</th><th>{t('Benutzername')}</th><th>{t('Stapel')}</th><th>{t('Zuletzt gelernt')}</th><th>{t('Status')}</th></tr>
@@ -108,13 +108,13 @@ function CreateChildModal({ onClose, onCreated }: { onClose: () => void; onCreat
       <form onSubmit={submit}>
         <Field label={t('Name')} hint={t('Vorname oder Spitzname reicht – bitte nur so viele Daten wie nötig.')}>
           <input value={displayName} required maxLength={80} dir="auto" onChange={(e) => {
-            setDisplayName(e.target.value);
-            if (!usernameTouched) setUsername(suggestUsername(e.target.value));
+            setDisplayName(e.currentTarget.value);
+            if (!usernameTouched) setUsername(suggestUsername(e.currentTarget.value));
           }} />
         </Field>
         <Field label={t('Benutzername')} hint={t('Damit meldet sich das Kind an. Kleinbuchstaben, Ziffern, Punkt, Minus.')}>
           <input className="mono" value={username} required minLength={3} maxLength={32} pattern="[a-z0-9][a-z0-9._\-]*" autoCapitalize="none"
-            onChange={(e) => { setUsername(e.target.value.toLowerCase()); setUsernameTouched(true); }} />
+            onChange={(e) => { setUsername(e.currentTarget.value.toLowerCase()); setUsernameTouched(true); }} />
         </Field>
         <Field label={t('Passwort')} hint={t('Mindestens 6 Zeichen. „Vorschlag“ erzeugt ein leicht merkbares Passwort.')}>
           <PasswordInput value={password} onChange={setPassword} forChild minLength={6} />
@@ -125,7 +125,7 @@ function CreateChildModal({ onClose, onCreated }: { onClose: () => void; onCreat
               {decks.data.map((d) => (
                 <label key={d.id} className="check">
                   <input type="checkbox" checked={deckIds.includes(d.id)}
-                    onChange={(e) => setDeckIds(e.target.checked ? [...deckIds, d.id] : deckIds.filter((x) => x !== d.id))} />
+                    onChange={(e) => setDeckIds(e.currentTarget.checked ? [...deckIds, d.id] : deckIds.filter((x) => x !== d.id))} />
                   <bdi>{d.title}</bdi> <span className="muted">({t('{n} Karten', { n: d.cardCount })})</span>
                 </label>
               ))}
